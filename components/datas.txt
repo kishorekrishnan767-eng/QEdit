@@ -1,0 +1,25 @@
+Here is the list of all course syllabus datasets and specializations currently integrated into your database:
+1. Undergraduate (UG) Courses (Semesters 1 to 8)
+•	BCA (Bachelor of Computer Applications)
+•	CA (Computer Application) — Mapped with core courses like Digital Logic Design, Programming using Java, Data Structures, etc.
+•	Data Science — Mapped with core courses like Fundamentals of Data Science, Elements of Distributed Data Processing, Intelligent Automation, etc.
+•	Gen AI — Mapped with core courses like Generative Artificial Intelligence, Machine Learning for NLP, Generative AI and LLM Frameworks, etc.
+•	BSc (Bachelor of Science)
+•	Computer Science — Mapped with core courses like Digital Electronics, Object Oriented Programming using Java, Operating System, etc.
+•	CS AI & ML — Mapped with core courses like Computing Fundamentals, Introduction to AI and ML, Deep Learning Techniques, etc.
+•	CS Cyber Security — Mapped with core courses like Hardware Maintenance, Introduction to Cyber Security, Ethical Hacking, Penetration Testing, etc.
+________________________________________
+2. Postgraduate (PG) Courses (Semesters 1 to 4)
+•	MCA (Master of Computer Applications)
+•	CA (Computer Application) — Mapped with core courses like Advanced Operating System, Database Technology, Capstone Project, etc.
+•	Generative Artificial Intelligence — Mapped with core courses like Deep Neural Networks, Building GPT Powered Business Applications, Prompt Engineering, etc.
+•	MSc (Master of Science)
+•	Applied Data Science — Mapped with core courses like Statistical Foundations, SQL and NoSQL, Reinforcement Learning for AI, etc.
+•	Computer Science with Specialization in Full Stack Development — Mapped with core courses like REST and GraphQL, DevOps, UX/UI Design, MongoDB, etc.
+•	Computer Science — Mapped with core courses like Distributed Operating System, Agile Software Development, Information Storage, etc.
+•	Information Technology — Mapped with core courses like Enterprise Java Programming, Social Network Security, HTML and CSS, etc.
+________________________________________
+3. Common/General Courses (Auto-shared across streams)
+•	General Languages: Tamil – I/II, Hindi – I/II, French – I/II, English, Business English.
+•	Mandatory / Value-Added Courses: NSS, NCC, NSO, YOGA, Environmental Studies, Universal Human Values.
+•	Skills / Aptitude: Verbal Ability and Skill Development, Quantitative Aptitude and Logical Reasoning, Essentials of Artificial Intelligence.
