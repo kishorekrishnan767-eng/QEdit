@@ -256,23 +256,41 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
 
   const updateStatus = async (id: string, status: AuthUser['status']) => {
     setActionLoading(id + status);
-    const res = await fetch(`/api/admin/users/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u));
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u));
+      } else {
+        alert(data.error || 'Failed to update user status');
+      }
+    } catch (err: any) {
+      alert('Error updating user status: ' + err.message);
+    } finally {
+      setActionLoading(null);
     }
-    setActionLoading(null);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Remove this user from the system?')) return;
     setActionLoading(id + 'delete');
-    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
-    if (res.ok) setUsers(prev => prev.filter(u => u.id !== id));
-    setActionLoading(null);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== id));
+      } else {
+        alert(data.error || 'Failed to delete user');
+      }
+    } catch (err: any) {
+      alert('Error deleting user: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleAddEmail = async (e: React.FormEvent) => {
@@ -902,72 +920,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#fafbfc]">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-gray-900">Super Admins</h2>
-                    <p className="text-sm text-gray-500 font-medium">Manage root-level delegates for the system.</p>
-                  </div>
-                  {role === 'superadmin' && (
-                    <div className="flex gap-2">
-                       <input type="email" placeholder="superadmin@school.edu" 
-                         value={addEmail} onChange={(e) => setAddEmail(e.target.value)}
-                         className="px-4 py-2 w-[220px] rounded-xl text-sm border border-gray-200 bg-white focus:border-[#2a7d5f] outline-none" 
-                       />
-                       <button onClick={async (e) => {
-                          e.preventDefault();
-                          if (!addEmail) return;
-                          setAddingEmail(true);
-                          const res = await fetch('/api/admin/users', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: addEmail.trim(), status: 'superadmin' }),
-                          });
-                          setAddingEmail(false);
-                          if (res.ok) { setAddEmail(''); fetchUsers(); }
-                          else alert('Failed to add super admin.');
-                       }} 
-                         disabled={addingEmail}
-                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[#2a7d5f] text-white hover:bg-[#1f5e47] transition-all disabled:opacity-50 shadow-sm"
-                       >
-                         {addingEmail ? <RefreshCw size={16} className="animate-spin" /> : <Shield size={16} />} Add
-                       </button>
-                    </div>
-                  )}
-                </div>
 
-                <div className="divide-y divide-gray-100">
-                  {superAdmins.map((u) => (
-                    <div key={u.id} className="group flex items-center justify-between p-4 px-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 bg-gray-900 text-white shadow-sm">
-                          {u.email.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-gray-900 truncate">{u.email}</p>
-                          <span className="text-[11px] font-medium text-gray-400">
-                            Joined {new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0 ml-4 opacity-70 group-hover:opacity-100 transition-opacity">
-                        {role === 'superadmin' && (
-                          <button onClick={() => updateStatus(u.id, 'admin')}
-                            disabled={!!actionLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-40 bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 shadow-sm">
-                            {actionLoading === u.id + 'admin' ? <RefreshCw size={12} className="animate-spin" /> : <UserX size={12} />} 
-                            Revoke Root
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {superAdmins.length === 0 && (
-                     <div className="p-10 text-center text-sm text-gray-500 font-medium">No secondary super admins assigned.</div>
-                  )}
-                </div>
-              </div>
             </div>
           )}
 

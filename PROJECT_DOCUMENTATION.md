@@ -507,7 +507,7 @@ Generic reusable modal wrapper with backdrop blur, escape key handling, and scro
 ### 10.1 `lib/constants.ts`
 
 ```typescript
-export const ADMIN_EMAIL = 'mh6651@srmist.edu.in';
+export const ADMIN_EMAIL = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
 ```
 
 Single source of truth for the system administrator email. This email:

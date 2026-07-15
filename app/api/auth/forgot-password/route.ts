@@ -3,14 +3,19 @@ import { createClient } from '@supabase/supabase-js';
 import transporter from '@/lib/mailer';
 import crypto from 'crypto';
 
-// Use service role for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseAdminInstance: any = null;
 
 export async function POST(req: NextRequest) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Supabase credentials are not configured.' }, { status: 500 });
+    }
+    if (!supabaseAdminInstance) {
+      supabaseAdminInstance = createClient(supabaseUrl, serviceKey);
+    }
+
     const { email } = await req.json();
 
     if (!email) {
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Check if the email is in authorized_users table
-    const { data: authorized } = await supabaseAdmin
+    const { data: authorized } = await supabaseAdminInstance
       .from('authorized_users')
       .select('email')
       .eq('email', normalizedEmail)
@@ -32,9 +37,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if an account with this email actually exists in Supabase Auth
-    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: users } = await supabaseAdminInstance.auth.admin.listUsers();
     const userExists = users?.users?.some(
-      (u) => u.email?.toLowerCase() === normalizedEmail
+      (u: any) => u.email?.toLowerCase() === normalizedEmail
     );
 
     if (!userExists) {
@@ -46,13 +51,13 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     // Delete any existing tokens for this email
-    await supabaseAdmin
+    await supabaseAdminInstance
       .from('password_reset_tokens')
       .delete()
       .eq('email', normalizedEmail);
 
     // Store token
-    const { error: insertError } = await supabaseAdmin
+    const { error: insertError } = await supabaseAdminInstance
       .from('password_reset_tokens')
       .insert({
         email: normalizedEmail,

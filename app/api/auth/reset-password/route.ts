@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Service role client for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseAdminInstance: any = null;
 
 export async function POST(req: NextRequest) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Supabase credentials are not configured.' }, { status: 500 });
+    }
+    if (!supabaseAdminInstance) {
+      supabaseAdminInstance = createClient(supabaseUrl, serviceKey);
+    }
+
     const { token, newPassword } = await req.json();
 
     if (!token || !newPassword) {
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch token record
-    const { data: tokenRecord, error: fetchError } = await supabaseAdmin
+    const { data: tokenRecord, error: fetchError } = await supabaseAdminInstance
       .from('password_reset_tokens')
       .select('*')
       .eq('token', token)
@@ -39,15 +44,15 @@ export async function POST(req: NextRequest) {
     const email = tokenRecord.email;
 
     // Find user by email
-    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-    const user = users?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    const { data: users } = await supabaseAdminInstance.auth.admin.listUsers();
+    const user = users?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
 
     if (!user) {
       return NextResponse.json({ error: 'No account found for this email' }, { status: 404 });
     }
 
     // Update password using admin API
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    const { error: updateError } = await supabaseAdminInstance.auth.admin.updateUserById(
       user.id,
       { password: newPassword }
     );
@@ -58,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Mark token as used
-    await supabaseAdmin
+    await supabaseAdminInstance
       .from('password_reset_tokens')
       .update({ used: true })
       .eq('token', token);

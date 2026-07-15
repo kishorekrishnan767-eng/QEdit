@@ -83,9 +83,9 @@ const DEPARTMENTS = [
 ];
 
 const EXAMS = [
-  "Cyclic test 1",
-  "Cyclic test 2",
-  "Model examination"
+  "Cycle Test – I",
+  "Cycle Test – II",
+  "Model Examination"
 ];
 
 interface SyllabusCourse {
@@ -625,10 +625,47 @@ const getSelectedSem = (semester: string | undefined): string => {
   return romanToSemMap[semester]?.toString() || "";
 };
 
+const isElective = (code: string): boolean => {
+  if (!code || code.length < 6) return false;
+  const char = code.charAt(5).toUpperCase();
+  return char === 'E' || char === 'D' || char === 'S';
+};
+
+const isMultidisciplinary = (code: string): boolean => {
+  if (!code || code.length < 6) return false;
+  const char = code.charAt(5).toUpperCase();
+  return char === 'M' || char === 'G';
+};
+
 export default function Editor({ initialData, paperId: initialPaperId, onSave }: EditorProps = {}) {
-  const startData = initialData || initialPaperData;
+  const startData = useMemo(() => {
+    const raw = initialData || initialPaperData;
+    const data = JSON.parse(JSON.stringify(raw));
+    if (data.header) {
+      const exam = data.header.examName || '';
+      const lower = exam.toLowerCase();
+      if (lower.includes('cyclic') || lower.includes('cylic') || lower.includes('cycle')) {
+        if (lower.includes('2') || lower.includes('ii')) {
+          data.header.examName = 'Cycle Test – II';
+        } else {
+          data.header.examName = 'Cycle Test – I';
+        }
+      } else if (lower.includes('model')) {
+        data.header.examName = 'Model Examination';
+      }
+    }
+    return data;
+  }, [initialData]);
+
   const [paperData, setPaperData] = useState<PaperData>(startData);
   const [activeSectionId, setActiveSectionId] = useState<string>(startData.sections[0]?.id || 'sec-1');
+
+  useEffect(() => {
+    setPaperData(startData);
+    if (startData.sections?.[0]?.id) {
+      setActiveSectionId(startData.sections[0].id);
+    }
+  }, [initialPaperId, startData]);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [showPageSetup, setShowPageSetup] = useState(false);
   const [showSectionModal, setShowSectionModal] = useState(false);
@@ -643,6 +680,8 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
   const [showDate, setShowDate] = useState(true);
   const [manualCourseEntry, setManualCourseEntry] = useState(false);
   const [customSpecEntry, setCustomSpecEntry] = useState(false);
+  const [showElectiveOnly, setShowElectiveOnly] = useState(false);
+  const [showMultiOnly, setShowMultiOnly] = useState(false);
   const [coursesList, setCoursesList] = useState<SyllabusCourse[]>(COURSES_DATABASE);
 
   useEffect(() => {
@@ -718,9 +757,13 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
       // 4. Specialization check
       if (c.specialization && c.specialization.trim().toLowerCase() !== selectedSpec) return false;
 
+      // 5. Elective / Multidisciplinary Filter
+      if (showElectiveOnly && !isElective(c.code)) return false;
+      if (showMultiOnly && !isMultidisciplinary(c.code)) return false;
+
       return true;
     });
-  }, [selectedSemNum, selectedCourse, selectedSpec, coursesList, selectedRegulation]);
+  }, [selectedSemNum, selectedCourse, selectedSpec, coursesList, selectedRegulation, showElectiveOnly, showMultiOnly]);
 
   useEffect(() => {
     setManualCourseEntry(false);
@@ -793,14 +836,16 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
     return list;
   }, [paperData.header.department]);
 
-  const examOptions = useMemo(() => {
-    const list = [...EXAMS];
-    const current = paperData.header.examName;
-    if (current && !list.includes(current)) {
-      list.unshift(current);
-    }
-    return list;
+  const isCustomExam = useMemo(() => {
+    const exam = paperData.header.examName || '';
+    if (exam === '') return false;
+    return exam !== 'Cycle Test – I' && exam !== 'Cycle Test – II' && exam !== 'Model Examination';
   }, [paperData.header.examName]);
+
+  const dropdownValue = useMemo(() => {
+    if (isCustomExam) return 'Custom';
+    return paperData.header.examName || '';
+  }, [paperData.header.examName, isCustomExam]);
 
   // Wrap setPaperData to trigger autosave
   const setPaperDataWithAutoSave = useCallback((updater: PaperData | ((prev: PaperData) => PaperData)) => {
@@ -1242,7 +1287,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                     value={paperData.header.department || ''}
                     onChange={(e) => handleHeaderChange('department', e.target.value)}
                     className="w-full p-2 text-sm rounded-md"
-                    style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                    style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                   >
                     <option value="">Select Department</option>
                     {deptOptions.map((dept) => (
@@ -1251,18 +1296,69 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Exam Name</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Internal Exams</label>
                   <select
-                    value={paperData.header.examName || ''}
-                    onChange={(e) => handleHeaderChange('examName', e.target.value)}
+                    value={dropdownValue}
+                    onChange={(e) => {
+                      const selectedVal = e.target.value;
+                      if (selectedVal === 'Cycle Test – I') {
+                        setPaperDataWithAutoSave(prev => ({
+                          ...prev,
+                          header: {
+                            ...prev.header,
+                            examName: 'Cycle Test – I',
+                            totalMarks: 50
+                          }
+                        }));
+                      } else if (selectedVal === 'Cycle Test – II') {
+                        setPaperDataWithAutoSave(prev => ({
+                          ...prev,
+                          header: {
+                            ...prev.header,
+                            examName: 'Cycle Test – II',
+                            totalMarks: 50
+                          }
+                        }));
+                      } else if (selectedVal === 'Model Examination') {
+                        setPaperDataWithAutoSave(prev => ({
+                          ...prev,
+                          header: {
+                            ...prev.header,
+                            examName: 'Model Examination',
+                            totalMarks: 100
+                          }
+                        }));
+                      } else if (selectedVal === 'Custom') {
+                        setPaperDataWithAutoSave(prev => ({
+                          ...prev,
+                          header: {
+                            ...prev.header,
+                            examName: 'Custom Exam'
+                          }
+                        }));
+                      } else {
+                        handleHeaderChange('examName', selectedVal);
+                      }
+                    }}
                     className="w-full p-2 text-sm rounded-md"
-                    style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                    style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                   >
-                    <option value="">Select Exam Name</option>
-                    {examOptions.map((exam) => (
-                      <option key={exam} value={exam}>{exam}</option>
-                    ))}
+                    <option value="">Select Internal Exam</option>
+                    <option value="Cycle Test – I">Cycle Test – I</option>
+                    <option value="Cycle Test – II">Cycle Test – II</option>
+                    <option value="Model Examination">Model Examination</option>
+                    <option value="Custom">Custom</option>
                   </select>
+                  {isCustomExam && (
+                    <input
+                      type="text"
+                      value={paperData.header.examName === 'Custom Exam' ? '' : paperData.header.examName}
+                      placeholder="Enter Custom Exam Name"
+                      onChange={(e) => handleHeaderChange('examName', e.target.value || 'Custom Exam')}
+                      className="w-full p-2 mt-2 text-sm rounded-md"
+                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#fff' }}
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Regulation</label>
@@ -1270,13 +1366,14 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                     value={paperData.header.regulation || '2024'}
                     onChange={(e) => handleHeaderChange('regulation', e.target.value)}
                     className="w-full p-2 text-sm rounded-md"
-                    style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                    style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                   >
                     {regulationsList.map((reg) => (
                       <option key={reg} value={reg}>{reg} Regulation</option>
                     ))}
                   </select>
                 </div>
+
                 <div className="col-span-2">
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Class</label>
                   <div className="grid grid-cols-2 gap-2">
@@ -1302,7 +1399,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                         handleHeaderChange('class', newClass);
                       }}
                       className="p-2 text-sm rounded-md"
-                      style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                     >
                       <option value="">Select Course</option>
                       <option value="BCA">BCA</option>
@@ -1346,7 +1443,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           }
                         }}
                         className="p-2 text-sm rounded-md"
-                        style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                        style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                       >
                         <option value="">Select Specialization</option>
                         {specsList.map(spec => (
@@ -1380,7 +1477,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           }}
                           placeholder="e.g. DATA SCIENCE"
                           className="p-2 text-sm rounded-md pr-8 w-full"
-                          style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                          style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                         />
                         {specsList.length > 0 && (
                           <button
@@ -1438,7 +1535,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                       }));
                     }}
                     className="w-full p-2 text-sm rounded-md"
-                    style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                    style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                   >
                     <option value="">Select Semester</option>
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
@@ -1480,7 +1577,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                         }
                       }}
                       className="w-full p-2 text-sm rounded-md"
-                      style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                     >
                       <option value="">Select Course Code</option>
                       {semesterCourses.map((c) => (
@@ -1501,24 +1598,24 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                       }}
                       placeholder="e.g. UCS2401"
                       className="w-full p-2 text-sm rounded-md"
-                      style={{ border: '1px solid #d1d5db', color: '#1a1a2e', textTransform: allCaps ? 'uppercase' : 'none' }}
+                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5', textTransform: allCaps ? 'uppercase' : 'none' }}
                     />
                   )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Subject</label>
-                  <input type="text" value={paperData.header.subject} onChange={(e) => { let v = e.target.value; if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase()); if (allCaps) v = v.toUpperCase(); handleHeaderChange('subject', v); }} placeholder="e.g. Data Structures" className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', textTransform: allCaps ? 'uppercase' : 'none' }} />
+                  <input type="text" value={paperData.header.subject} onChange={(e) => { let v = e.target.value; if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase()); if (allCaps) v = v.toUpperCase(); handleHeaderChange('subject', v); }} placeholder="e.g. Data Structures" className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5', textTransform: allCaps ? 'uppercase' : 'none' }} />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Reg No. Boxes</label>
-                  <input type="number" min="5" max="20" value={paperData.header.regNoBoxCount || 15} onChange={(e) => handleHeaderChange('regNoBoxCount', Math.min(20, Math.max(5, parseInt(e.target.value) || 15)))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }} />
+                  <input type="number" min="5" max="20" value={paperData.header.regNoBoxCount || 15} onChange={(e) => handleHeaderChange('regNoBoxCount', Math.min(20, Math.max(5, parseInt(e.target.value) || 15)))} className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }} />
                 </div>
                 <div className="col-span-2 flex gap-4">
                   {showDate && (
                     <div className="flex-1">
                       <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Date <span className="font-normal" style={{ color: '#9ca3af' }}>(optional)</span></label>
-                      <input type="date" value={paperData.header.date} onChange={(e) => handleHeaderChange('date', e.target.value)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }} />
+                      <input type="date" value={paperData.header.date} onChange={(e) => handleHeaderChange('date', e.target.value)} className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }} />
                     </div>
                   )}
                   <div className={showDate ? "" : "flex-1"}>
@@ -1537,7 +1634,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           handleHeaderChange('duration', formatted.trim());
                         }}
                         className="p-2 text-sm rounded-md"
-                        style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                        style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                       >
                         <option value="">Hrs</option>
                         {[1, 2, 3, 4, 5].map(h => <option key={h} value={h}>{h} Hr{h > 1 ? 's' : ''}</option>)}
@@ -1555,7 +1652,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           handleHeaderChange('duration', formatted.trim());
                         }}
                         className="p-2 text-sm rounded-md"
-                        style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }}
+                        style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                       >
                         <option value="">Mins</option>
                         <option value="15">15 Min</option>
@@ -1567,56 +1664,9 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Total Marks</label>
-                  <input type="number" value={paperData.header.totalMarks ?? ''} onChange={(e) => handleHeaderChange('totalMarks', parseInt(e.target.value) || 0)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e' }} />
+                  <input type="number" value={paperData.header.totalMarks ?? ''} onChange={(e) => handleHeaderChange('totalMarks', parseInt(e.target.value) || 0)} className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }} />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Institution Logo</label>
-                  <div className="flex items-center gap-3">
-                    {paperData.header.logo && (
-                      <img src={paperData.header.logo} alt="Logo" className="h-10 w-10 object-contain rounded" style={{ filter: 'grayscale(100%)', border: '1px solid #e2e5ea' }} />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            handleHeaderChange('logo', ev.target?.result as string);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:cursor-pointer"
-                      style={{ color: '#6b7280' }}
-                    />
-                    {paperData.header.logo && paperData.header.logo !== '/srm.png' && (
-                      <button
-                        type="button"
-                        onClick={() => handleHeaderChange('logo', '/srm.png')}
-                        className="text-xs transition-colors"
-                        style={{ color: '#9ca3af' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#2a7d5f')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
-                      >
-                        Reset
-                      </button>
-                    )}
-                    {paperData.header.logo && (
-                      <button
-                        type="button"
-                        onClick={() => handleHeaderChange('logo', '')}
-                        className="text-xs transition-colors"
-                        style={{ color: '#9ca3af' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#dc2626')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Institution Logo upload hidden */}
               </div>
             )}
           </div>
@@ -1788,44 +1838,11 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#9ca3af' }}>Display Options</h4>
               <div className="flex items-center justify-between py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                <label className="text-sm" style={{ color: '#374151' }}>Show BL / CO / PO columns</label>
+                <label className="text-sm" style={{ color: '#374151' }}>Show CO / PO columns</label>
                 <button type="button" onClick={() => setShowBlCoPo(!showBlCoPo)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: showBlCoPo ? '#2a7d5f' : '#d1d5db' }}>
                   <span className="absolute top-0.5 rounded-full w-4 h-4 bg-white transition-all shadow-sm" style={{ left: showBlCoPo ? '18px' : '2px' }} />
                 </button>
               </div>
-              <div className="flex items-center justify-between py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                <label className="text-sm" style={{ color: '#374151' }}>Show Institution Logo</label>
-                <button type="button" onClick={() => setShowLogo(!showLogo)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: showLogo ? '#2a7d5f' : '#d1d5db' }}>
-                  <span className="absolute top-0.5 rounded-full w-4 h-4 bg-white transition-all shadow-sm" style={{ left: showLogo ? '18px' : '2px' }} />
-                </button>
-              </div>
-              {showLogo && (
-                <div className="flex items-center gap-3 py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                  <label className="text-sm shrink-0" style={{ color: '#374151' }}>Logo Size</label>
-                  <input type="range" min="30" max="120" step="5" value={logoSize} onChange={(e) => setLogoSize(parseInt(e.target.value))} className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer" style={{ accentColor: '#2a7d5f' }} />
-                  <span className="text-xs font-mono w-10 text-right" style={{ color: '#6b7280' }}>{logoSize}px</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                <label className="text-sm" style={{ color: '#374151' }}>Logo Watermark on Pages</label>
-                <button type="button" onClick={() => setShowWatermark(!showWatermark)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: showWatermark ? '#2a7d5f' : '#d1d5db' }}>
-                  <span className="absolute top-0.5 rounded-full w-4 h-4 bg-white transition-all shadow-sm" style={{ left: showWatermark ? '18px' : '2px' }} />
-                </button>
-              </div>
-              {showWatermark && (
-                <>
-                  <div className="flex items-center gap-3 py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                    <label className="text-sm shrink-0" style={{ color: '#374151' }}>Watermark Opacity</label>
-                    <input type="range" min="0.01" max="0.15" step="0.01" value={watermarkOpacity} onChange={(e) => setWatermarkOpacity(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer" style={{ accentColor: '#2a7d5f' }} />
-                    <span className="text-xs font-mono w-8 text-right" style={{ color: '#6b7280' }}>{Math.round(watermarkOpacity * 100)}%</span>
-                  </div>
-                  <div className="flex items-center gap-3 py-2 px-3 rounded-md" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
-                    <label className="text-sm shrink-0" style={{ color: '#374151' }}>Watermark Size</label>
-                    <input type="range" min="80" max="400" step="10" value={watermarkSize} onChange={(e) => setWatermarkSize(parseInt(e.target.value))} className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer" style={{ accentColor: '#2a7d5f' }} />
-                    <span className="text-xs font-mono w-10 text-right" style={{ color: '#6b7280' }}>{watermarkSize}px</span>
-                  </div>
-                </>
-              )}
 
             </div>
 

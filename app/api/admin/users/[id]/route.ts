@@ -66,7 +66,7 @@ export async function DELETE(
   // Ensure an admin doesn't delete another admin unless they are superadmin
   const { data: targetUser } = await getAdminSupabase()
     .from('authorized_users')
-    .select('status')
+    .select('email, status')
     .eq('id', id)
     .single();
 
@@ -74,6 +74,22 @@ export async function DELETE(
     return NextResponse.json({ error: 'Only Super Admins can delete Admins' }, { status: 403 });
   }
 
+  // 1. Delete from Supabase Auth so they can't log in anymore
+  if (targetUser?.email) {
+    const supabaseAdmin = getAdminSupabase();
+    const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+    const authUser = usersData?.users?.find(
+      (u: any) => u.email?.toLowerCase() === targetUser.email.toLowerCase()
+    );
+    if (authUser) {
+      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(authUser.id);
+      if (authDeleteError) {
+        console.error('Failed to delete user from Supabase Auth:', authDeleteError.message);
+      }
+    }
+  }
+
+  // 2. Delete from public.authorized_users table
   const { error } = await getAdminSupabase()
     .from('authorized_users')
     .delete()

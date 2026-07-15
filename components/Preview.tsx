@@ -98,7 +98,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           {showBlCoPo && (
             <div className="flex font-bold mb-2 text-right" style={{ fontSize: '0.85em' }}>
               <div className="flex-1 text-left"></div>
-              <div className="w-8 text-center">BL</div>
               <div className="w-8 text-center">CO</div>
               <div className="w-8 text-center">PO</div>
             </div>
@@ -140,7 +139,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                   </div>
                   {showBlCoPo && (
                     <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                      <span className="w-8 text-center block">{question.bl}</span>
                       <span className="w-8 text-center block">{question.co}</span>
                       <span className="w-8 text-center block">{question.po}</span>
                     </div>
@@ -156,7 +154,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                       </p>
                       {showBlCoPo && (
                         <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                          <span className="w-8 text-center block">{question.orQuestion.bl}</span>
                           <span className="w-8 text-center block">{question.orQuestion.co}</span>
                           <span className="w-8 text-center block">{question.orQuestion.po}</span>
                         </div>

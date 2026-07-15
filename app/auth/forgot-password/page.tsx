@@ -71,12 +71,9 @@ export default function ForgotPasswordPage() {
           </div>
           
           <div className="mt-auto pt-8 border-t" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-            <p className="text-lg font-medium flex items-center gap-2 text-white">
-              <span className="opacity-80">Crafted with</span> 
-              <span className="text-xl animate-pulse" style={{ filter: 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.5))' }}>💚</span> 
-              <span className="opacity-80">by</span> 
-              <strong className="tracking-wide text-[#86efac]">Chan&apos;s Team</strong>
-            </p>
+            <p className="text-xl font-bold tracking-wide text-[#86efac] mb-1">Livewires</p>
+            <p className="text-sm text-white opacity-70">Developed by <span className="opacity-90 font-medium text-white">Vaseem</span></p>
+            <p className="text-sm text-white opacity-70">Developed &amp; Maintained by <span className="opacity-90 font-medium text-white">Kishore Krishnan</span></p>
           </div>
         </div>
       </div>
@@ -148,10 +145,10 @@ export default function ForgotPasswordPage() {
             </Link>
           </p>
           
-          <div className="mt-8 lg:hidden flex justify-center pb-8 border-t border-gray-100 pt-6">
-            <p className="text-sm font-medium flex items-center gap-1.5 text-gray-400">
-              Crafted with <span>💚</span> by Chan&apos;s Team
-            </p>
+          <div className="mt-8 lg:hidden flex flex-col items-center gap-0.5 pb-8 border-t border-gray-100 pt-6">
+            <p className="text-sm font-bold text-[#2a7d5f]">Livewires</p>
+            <p className="text-xs text-gray-400">Developed by <span className="font-medium text-gray-500">Vaseem</span></p>
+            <p className="text-xs text-gray-400">Developed &amp; Maintained by <span className="font-medium text-gray-500">Kishore Krishnan</span></p>
           </div>
         </div>
       </div>

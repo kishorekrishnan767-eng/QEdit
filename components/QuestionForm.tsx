@@ -284,53 +284,21 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       {showBlCoPo && (
       <div className="space-y-2">
         <div className="flex items-end gap-2 w-full">
-          {/* BL */}
-          <div className="flex-[4] min-w-0">
-            <label className="block text-xs font-medium mb-1" style={labelStyle}>BL</label>
-            <div className="flex gap-1 items-center">
-              <select value={bl} onChange={(e) => setBl(e.target.value)} className="w-full p-1.5 text-sm rounded-md" style={inputStyle} title="Bloom's Level">
-                {[1, 2, 3, 4, 5, 6].map(i => <option key={i} value={i}>{i}</option>)}
-              </select>
-              <button
-                type="button"
-                onClick={() => generateBloomLevel(text, false)}
-                disabled={isGeneratingBl}
-                title="Auto-generate Bloom's Level using AI"
-                className="flex items-center justify-center gap-1.5 rounded-md transition-all whitespace-nowrap"
-                style={{
-                  height: '34px', padding: '0 8px',
-                  background: isGeneratingBl ? '#e2e5ea' : 'linear-gradient(135deg, #7c3aed, #2a7d5f)',
-                  color: '#fff', border: 'none', cursor: isGeneratingBl ? 'not-allowed' : 'pointer',
-                  fontSize: '11px', fontWeight: 600
-                }}
-              >
-                {isGeneratingBl
-                  ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                  : <Sparkles size={14} />}
-                Auto BL
-              </button>
-            </div>
-          </div>
           {/* CO */}
-          <div className="flex-[3] min-w-0">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium mb-1" style={labelStyle}>CO</label>
             <select value={co} onChange={(e) => setCo(e.target.value)} className="w-full p-1.5 text-sm rounded-md" style={inputStyle}>
               {[1, 2, 3, 4, 5].map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
           {/* PO */}
-          <div className="flex-[3] min-w-0">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium mb-1" style={labelStyle}>PO</label>
             <select value={po} onChange={(e) => setPo(e.target.value)} className="w-full p-1.5 text-sm rounded-md" style={inputStyle}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
         </div>
-        {blError && (
-          <p className="text-xs py-1 px-2 rounded-md" style={{ color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca' }}>
-            ⚠ {blError}
-          </p>
-        )}
       </div>
       )}
 
@@ -380,32 +348,10 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
               />
                {showBlCoPo && (
                <div className="space-y-2">
-                 <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-xs" style={labelStyle}>BL</label>
-                    <div className="flex gap-1 items-center">
-                      <select value={orQuestionBl} onChange={(e) => setOrQuestionBl(e.target.value)} className="flex-1 p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6].map(i => <option key={i} value={i}>{i}</option>)}</select>
-                      <button
-                        type="button"
-                        onClick={() => generateBloomLevel(orQuestionText, true)}
-                        disabled={isGeneratingOrBl}
-                        title="Auto-generate Bloom's Level for OR question"
-                        className="flex items-center justify-center rounded-md transition-all"
-                        style={{
-                          width: '26px', height: '26px', flexShrink: 0,
-                          background: isGeneratingOrBl ? '#e2e5ea' : 'linear-gradient(135deg, #7c3aed, #2a7d5f)',
-                          color: '#fff', border: 'none', cursor: isGeneratingOrBl ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {isGeneratingOrBl
-                          ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
-                          : <Sparkles size={11} />}
-                      </button>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2">
+                   <div><label className="text-xs" style={labelStyle}>CO</label><select value={orQuestionCo} onChange={(e) => setOrQuestionCo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
+                   <div><label className="text-xs" style={labelStyle}>PO</label><select value={orQuestionPo} onChange={(e) => setOrQuestionPo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
                   </div>
-                  <div><label className="text-xs" style={labelStyle}>CO</label><select value={orQuestionCo} onChange={(e) => setOrQuestionCo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
-                  <div><label className="text-xs" style={labelStyle}>PO</label><select value={orQuestionPo} onChange={(e) => setOrQuestionPo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
-                 </div>
                </div>
                )}
           </div>
@@ -430,10 +376,10 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
                            <div className="flex gap-2">
                                <input type="number" placeholder="Marks (Opt)" value={sub.marks || ''} onChange={(e) => updateSubQuestion(idx, 'marks', e.target.value ? parseInt(e.target.value) : undefined)} className="w-20 p-1 text-xs rounded-md" style={inputStyle} />
                                {showBlCoPo && (<>
-                               <select value={sub.bl} onChange={(e) => updateSubQuestion(idx, 'bl', e.target.value)} title="Bloom's Level" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6].map(i=><option key={i} value={i}>{i}</option>)}</select>
                                <select value={sub.co} onChange={(e) => updateSubQuestion(idx, 'co', e.target.value)} title="Course Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5].map(i=><option key={i} value={i}>{i}</option>)}</select>
                                <select value={sub.po} onChange={(e) => updateSubQuestion(idx, 'po', e.target.value)} title="Program Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6,7,8,9,10,11,12].map(i=><option key={i} value={i}>{i}</option>)}</select>
-                               </>)}\r\n                           </div>
+                               </>)}
+                           </div>
                        </div>
                        <button type="button" onClick={() => removeSubQuestion(idx)} className="mt-1 p-1 rounded transition-colors" style={{ color: '#c4c9d1' }}
                          onMouseEnter={(e) => (e.currentTarget.style.color = '#dc2626')}

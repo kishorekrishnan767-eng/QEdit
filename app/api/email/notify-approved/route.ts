@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const paperUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/paper/${paperId}`;
+    const paperUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://qedit-srm.vercel.app'}/paper/${paperId}`;
 
     await transporter.sendMail({
       from: process.env.MAIL_FROM,

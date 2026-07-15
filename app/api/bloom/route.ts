@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groqInstance: Groq | null = null;
 
 const BLOOM_SYSTEM_PROMPT = `You are an expert in Bloom's Taxonomy for educational assessment.
 
@@ -45,7 +45,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const completion = await groq.chat.completions.create({
+    if (!groqInstance) {
+      groqInstance = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    }
+
+    const completion = await groqInstance.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: BLOOM_SYSTEM_PROMPT },

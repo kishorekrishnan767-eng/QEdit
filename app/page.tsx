@@ -137,12 +137,6 @@ export default function LandingPage() {
           </div>
           {/* Right side — nav links + auth */}
           <div className="flex items-center gap-7">
-            <div className="hidden md:flex items-center gap-7">
-              <Link href="#" className="text-lg font-semibold hover:opacity-70 transition-opacity" style={{ color: '#2a7d5f' }}>About</Link>
-              <Link href="#" className="text-lg font-semibold hover:opacity-70 transition-opacity" style={{ color: '#2a7d5f' }}>Features</Link>
-              <Link href="#" className="text-lg font-semibold hover:opacity-70 transition-opacity" style={{ color: '#2a7d5f' }}>Docs</Link>
-              <Link href="#contact" className="text-lg font-semibold hover:opacity-70 transition-opacity" style={{ color: '#2a7d5f' }}>Contact</Link>
-            </div>
             <Link href="/auth" className="px-7 py-3 rounded-full text-lg font-bold text-white bg-[#2a7d5f] hover:bg-[#1f5e47] transition-colors">Get Started &rarr;</Link>
           </div>
         </div>
@@ -207,7 +201,7 @@ export default function LandingPage() {
               <span className="text-[#2a7d5f]">academic assessments.</span>
             </h1>
             <p className="text-lg text-gray-500 font-medium mb-10 max-w-2xl mx-auto leading-relaxed">
-              Design, manage, and export professional question papers in minutes. Real-time split-pane editing, Bloom&apos;s Taxonomy tagging, and one-click PDF generation — all in one platform.
+              Design, manage, and export professional question papers in minutes. Real-time split-pane editing, OBE outcome mapping, and one-click PDF generation — all in one platform.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="#" 
@@ -272,7 +266,6 @@ export default function LandingPage() {
                        <div className="flex items-center justify-between pl-2">
                          <div className="h-2.5 w-20 bg-emerald-100 rounded"></div>
                          <div className="flex gap-1">
-                           <div className="h-4 w-6 bg-orange-100 rounded text-[8px] flex items-center justify-center font-bold text-orange-500">BL</div>
                            <div className="h-4 w-6 bg-blue-100 rounded text-[8px] flex items-center justify-center font-bold text-blue-500">CO</div>
                            <div className="h-4 w-6 bg-purple-100 rounded text-[8px] flex items-center justify-center font-bold text-purple-500">PO</div>
                          </div>
@@ -283,12 +276,7 @@ export default function LandingPage() {
                          <div className="h-2 w-3/5 bg-gray-100 rounded"></div>
                        </div>
                     </div>
-                    {/* Bottom buttons */}
-                    <div className="flex gap-2 mt-auto">
-                      <div className="h-7 px-3 bg-[#2a7d5f] rounded-lg opacity-90 flex items-center justify-center gap-1">
-                        <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.04em' }}>✦ Auto BL</span>
-                      </div>
-                    </div>
+
                   </div>
                   
                   {/* Preview Right Pane */}
@@ -338,7 +326,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                Bloom's BL/CO/PO Tagging
+                OBE Outcome Mapping
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-400"></div>
@@ -368,7 +356,7 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>, accent: '#2a7d5f', bg: '#e8f5ee', border: '#c4e5d3', title: 'Live A4 Rendering', desc: 'Pixel-accurate preview with auto-pagination and dynamic question numbering across sections.' },
-                { icon: <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.502 2.502 0 0 1 1.44-3.54A2.5 2.5 0 0 1 9.5 2zm0 0M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.502 2.502 0 0 0-1.44-3.54A2.5 2.5 0 0 0 14.5 2z"/>, accent: '#d97706', bg: '#fef3c7', border: '#fde68a', title: "Bloom's Automation", desc: 'Tag each question natively with Bloom\'s Taxonomy Levels (BL), Course Outcomes (CO), and Program Outcomes (PO).' },
+                { icon: <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.502 2.502 0 0 1 1.44-3.54A2.5 2.5 0 0 1 9.5 2zm0 0M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.502 2.502 0 0 0-1.44-3.54A2.5 2.5 0 0 0 14.5 2z"/>, accent: '#d97706', bg: '#fef3c7', border: '#fde68a', title: "OBE Outcome Mapping", desc: 'Tag each question natively with Course Outcomes (CO) and Program Outcomes (PO).' },
                 { icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>, accent: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', title: 'Zero-Touch PDFs', desc: 'Generate perfectly formatted 2-up landscape A4 PDFs with a single click. No layout adjustments needed.' },
                 { icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></>, accent: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', title: 'Collaboration Hub', desc: 'Share papers with precise view or edit permissions. Request management with in-app email notifications.' },
                 { icon: <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>, accent: '#dc2626', bg: '#fef2f2', border: '#fecaca', title: 'Multi-Admin Security', desc: 'Sys-Ops panel with root super-admin delegation, access approval workflows, and role isolation.' },
@@ -572,9 +560,11 @@ export default function LandingPage() {
 
            <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
              <p className="text-gray-500 text-xs font-medium">© {new Date().getFullYear()} QEdit Platform. All rights reserved.</p>
-             <p className="text-xs font-semibold flex items-center gap-1.5 text-gray-500">
-               Crafted with <span className="text-emerald-400 mx-0.5">💚</span> by Chan&apos;s Team
-             </p>
+             <div className="text-center md:text-right text-xs text-gray-500 font-semibold leading-relaxed">
+               <p className="text-emerald-400 font-bold text-sm">Livewires</p>
+               <p>Developed by Vaseem</p>
+               <p>Developed &amp; Maintained by Kishore Krishnan</p>
+             </div>
            </div>
         </div>
       </footer>
