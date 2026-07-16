@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { Question } from "@/types";
+import SpellCheckedTextarea from "./SpellCheckedTextarea";
 
 interface QuestionFormProps {
   onAddQuestion: (question: Question) => void;
@@ -106,7 +107,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     const newQuestion: Question = {
       id: editingQuestion ? editingQuestion.id : crypto.randomUUID(),
       text: capitalizeFirstLetter(text),
-      marks: sectionDefaultMarks || marks,
+      marks: marks,
       type,
       options: type === "mcq" ? options.map(capitalizeFirstLetter).filter((opt) => opt.trim() !== "") : undefined,
       bl,
@@ -183,8 +184,8 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       // User said "auto capitalize first letter" in previous turn which usually means Title Case. 
       // In Editor.tsx I used /\b\w/g (Title Case). Let's stick to consistency or what works for questions.
       // Actually questions are sentences. But user asked for "auto capitalize" same as header.
-      // Let's use the same logic as Editor.tsx for consistency if that's what they liked.
-      if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase()); 
+      // Let's use the sentence case logic as requested
+      if (autoCapitalize) v = v.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase()); 
       if (allCaps) v = v.toUpperCase();
       
       // Keep existing logic for single char if neither is on? 
@@ -195,7 +196,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
   
   const handleOrTextChange = (val: string) => {
       let v = val;
-      if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase());
+      if (autoCapitalize) v = v.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase());
       if (allCaps) v = v.toUpperCase();
       setOrQuestionText(v);
   };
@@ -203,7 +204,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
     let v = value;
-    if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase());
+    if (autoCapitalize) v = v.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase());
     if (allCaps) v = v.toUpperCase();
     newOptions[index] = v;
     setOptions(newOptions);
@@ -241,36 +242,32 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1" style={labelStyle}>Question Text</label>
-        <textarea
+        <SpellCheckedTextarea
           value={text}
-          onChange={(e) => handleTextChange(e.target.value)}
+          onChange={(v) => handleTextChange(v)}
+          placeholder="Enter your question here..."
+          rows={3}
+          as="textarea"
           className="w-full p-2 text-sm rounded-md"
           style={inputStyle}
-          rows={3}
-          placeholder="Enter your question here..."
         />
         <p className="text-[10px] text-gray-400 text-right mt-1">Use 'br' for Page Break</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1" style={labelStyle}>Marks</label>
-          <input
-            type="number"
-            min="1"
-            value={sectionDefaultMarks || marks}
-            onChange={(e) => !sectionDefaultMarks && setMarks(parseInt(e.target.value))}
-            disabled={!!sectionDefaultMarks}
-            className="w-full p-2 text-sm rounded-md"
-            style={{ ...inputStyle, background: sectionDefaultMarks ? '#f1f3f6' : '#fff', cursor: sectionDefaultMarks ? 'not-allowed' : 'auto' }}
-          />
-           {sectionDefaultMarks && <p className="text-xs mt-1" style={{ color: '#2a7d5f' }}>Using section default</p>}
-        </div>
-        <div>
           <label className="block text-sm font-medium mb-1" style={labelStyle}>Type</label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value as "short" | "long" | "mcq")}
+            onChange={(e) => {
+              const newType = e.target.value as "short" | "long" | "mcq";
+              setType(newType);
+              if (!sectionDefaultMarks) {
+                if (newType === 'mcq') setMarks(1);
+                else if (newType === 'short' && ![2, 5].includes(marks)) setMarks(2);
+                else if (newType === 'long' && ![15, 16].includes(marks)) setMarks(15);
+              }
+            }}
             className="w-full p-2 text-sm rounded-md"
             style={inputStyle}
           >
@@ -279,11 +276,57 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
             <option value="mcq">Multiple Choice</option>
           </select>
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1" style={labelStyle}>Marks</label>
+          <select
+            value={marks}
+            onChange={(e) => setMarks(parseInt(e.target.value))}
+            className="w-full p-2 text-sm rounded-md"
+            style={inputStyle}
+          >
+            {type === 'mcq' && <option value="1">1</option>}
+            {type === 'short' && (
+              <>
+                <option value="2">2</option>
+                <option value="5">5</option>
+              </>
+            )}
+            {type === 'long' && (
+              <>
+                <option value="15">15</option>
+                <option value="16">16</option>
+              </>
+            )}
+            {/* Fallbacks for existing valid numbers that don't match strict rules */}
+            {![1, 2, 5, 15, 16].includes(marks) && (
+              <option value={marks}>{marks}</option>
+            )}
+          </select>
+        </div>
       </div>
 
       {showBlCoPo && (
       <div className="space-y-2">
         <div className="flex items-end gap-2 w-full">
+          {/* Bloom's Level */}
+          <div className="flex-[2] min-w-0">
+            <label className="block text-xs font-medium mb-1 flex items-center justify-between" style={labelStyle}>
+              <span>Bloom's Level</span>
+              {blError && <span className="text-[10px] text-red-500 font-normal truncate ml-2" title={blError}>{blError}</span>}
+            </label>
+            <div className="flex gap-1">
+              <select
+                value={bl}
+                onChange={(e) => setBl(e.target.value)}
+                className="w-full p-1.5 text-sm rounded-md flex-1"
+                style={inputStyle}
+              >
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <option key={i} value={i}>{i}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           {/* CO */}
           <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium mb-1" style={labelStyle}>CO</label>
@@ -338,19 +381,28 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       {hasOrQuestion && (
           <div className="p-3 rounded-lg space-y-3" style={{ background: '#f8f9fb', border: '1px solid #e2e5ea' }}>
               <h4 className="text-sm font-semibold" style={{ color: '#4b5563' }}>OR Question Details</h4>
-              <textarea
+              <SpellCheckedTextarea
                 value={orQuestionText}
-                onChange={(e) => handleOrTextChange(e.target.value)}
-                className="w-full p-2 text-sm rounded-md"
-                style={inputStyle}
+                onChange={(v) => handleOrTextChange(v)}
+                as="textarea"
                 rows={2}
                 placeholder="Alternative question text..."
+                className="w-full p-2 text-sm rounded-md"
+                style={inputStyle}
               />
                {showBlCoPo && (
                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                   <div><label className="text-xs" style={labelStyle}>CO</label><select value={orQuestionCo} onChange={(e) => setOrQuestionCo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
-                   <div><label className="text-xs" style={labelStyle}>PO</label><select value={orQuestionPo} onChange={(e) => setOrQuestionPo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
+                  <div className="flex items-end gap-2 w-full">
+                    <div className="flex-[2] min-w-0">
+                      <label className="block text-xs font-medium mb-1" style={labelStyle}>Bloom's Level</label>
+                      <div className="flex gap-1">
+                        <select value={orQuestionBl} onChange={(e) => setOrQuestionBl(e.target.value)} className="w-full p-1 text-sm rounded-md flex-1" style={inputStyle}>
+                          {[1, 2, 3, 4, 5, 6].map(i => <option key={i} value={i}>{i}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0"><label className="block text-xs font-medium mb-1" style={labelStyle}>CO</label><select value={orQuestionCo} onChange={(e) => setOrQuestionCo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
+                    <div className="flex-1 min-w-0"><label className="block text-xs font-medium mb-1" style={labelStyle}>PO</label><select value={orQuestionPo} onChange={(e) => setOrQuestionPo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
                   </div>
                </div>
                )}
@@ -365,17 +417,23 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
                    <div key={sub.id} className="flex gap-2 items-start">
                        <span className="mt-2 text-xs font-mono font-bold" style={{ color: '#6b7280' }}>({['i','ii','iii','iv'][idx] || idx+1})</span>
                        <div className="flex-1 space-y-1">
-                           <input 
-                                type="text" 
-                                value={sub.text} 
-                                onChange={(e) => updateSubQuestion(idx, 'text', e.target.value)}
-                                className="w-full p-1.5 text-sm rounded-md" 
-                                style={inputStyle}
-                                placeholder="Sub-question text"
-                           />
+                            <SpellCheckedTextarea
+                                 value={sub.text}
+                                 as="input"
+                                 onChange={(v) => {
+                                     let val = v;
+                                     if (autoCapitalize) val = val.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase());
+                                     if (allCaps) val = val.toUpperCase();
+                                     updateSubQuestion(idx, 'text', val);
+                                 }}
+                                 placeholder="Sub-question text"
+                                 className="w-full p-1.5 text-sm rounded-md"
+                                 style={inputStyle}
+                            />
                            <div className="flex gap-2">
                                <input type="number" placeholder="Marks (Opt)" value={sub.marks || ''} onChange={(e) => updateSubQuestion(idx, 'marks', e.target.value ? parseInt(e.target.value) : undefined)} className="w-20 p-1 text-xs rounded-md" style={inputStyle} />
                                {showBlCoPo && (<>
+                               <select value={sub.bl || '1'} onChange={(e) => updateSubQuestion(idx, 'bl', e.target.value)} title="Bloom's Level" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6].map(i=><option key={i} value={i}>{i}</option>)}</select>
                                <select value={sub.co} onChange={(e) => updateSubQuestion(idx, 'co', e.target.value)} title="Course Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5].map(i=><option key={i} value={i}>{i}</option>)}</select>
                                <select value={sub.po} onChange={(e) => updateSubQuestion(idx, 'po', e.target.value)} title="Program Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6,7,8,9,10,11,12].map(i=><option key={i} value={i}>{i}</option>)}</select>
                                </>)}

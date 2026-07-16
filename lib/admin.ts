@@ -17,12 +17,24 @@ export async function getAdminRole(): Promise<{ ok: boolean; role: AdminRole; em
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user?.email) {
+      console.warn('[getAdminRole] No authenticated user found in session');
       return { ok: false, role: 'none' };
     }
     
-    const email = user.email.toLowerCase();
+    const email = user.email.toLowerCase().trim();
     
-    if (email === ADMIN_EMAIL.toLowerCase()) {
+    // Resolve admin email at call time (not module init) to avoid stale values
+    const adminEmail = (
+      process.env.ADMIN_EMAIL ||
+      process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+      ''
+    ).toLowerCase().trim();
+
+    if (!adminEmail) {
+      console.error('[getAdminRole] ADMIN_EMAIL env var is not set!');
+    }
+
+    if (adminEmail && email === adminEmail) {
       return { ok: true, role: 'superadmin', email };
     }
     
@@ -36,6 +48,7 @@ export async function getAdminRole(): Promise<{ ok: boolean; role: AdminRole; em
       return { ok: true, role: 'admin', email };
     }
     
+    console.warn(`[getAdminRole] User ${email} is not an admin. DB status: ${data?.status}, adminEmail: "${adminEmail}"`);
     return { ok: false, role: 'none', email };
   } catch (err: any) {
     console.error('[getAdminRole] Error:', err.message);

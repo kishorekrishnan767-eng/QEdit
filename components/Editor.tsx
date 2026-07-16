@@ -24,9 +24,9 @@ const formatDateDDMMYYYY = (dateStr: string) => {
 const initialPaperData: PaperData = {
   header: {
     institutionName: "SRM Institute of Science and Technology",
-    college: "Faculty of Science and Humanities, KTR",
-    department: "Department of Computer Applications",
-    examName: "Model Examination",
+    college: "Faculty of Science and Humanities, KTRR",
+    department: "Department of Computer Applications, ",
+    examName: "Model Examination, ",
     subject: "",
     courseCode: "",
     class: "",
@@ -57,34 +57,34 @@ const initialPaperData: PaperData = {
 };
 
 const DEPARTMENTS = [
-  "Department of Biochemistry",
-  "Department of Biotechnology",
-  "Career Development Centre",
-  "Department of Commerce",
+  "Department of Biochemistry, ",
+  "Department of Biotechnology, ",
+  "Career Development Centre, ",
+  "Department of Commerce, ",
   "Department of Computer Applications",
-  "Department of Computer Science",
-  "Department of Corporate Secretaryship and Accounting & Finance",
-  "Department of Defence and Strategic Studies",
-  "School of Education",
-  "Department of Economics",
-  "Department of English",
-  "Department of Fashion Designing",
-  "Department of French",
-  "Department of Hindi",
-  "Institute of Hotel and Catering Management",
-  "Department of Journalism and Mass Communication",
-  "Department of Mathematics and Statistics",
-  "Department of Physical Education & Sports Sciences",
-  "Department Of Psychology",
-  "Department of Social Work",
-  "Department of Tamil",
-  "Department of Visual Communication",
-  "Department of Yoga"
+  "Department of Computer Science, ",
+  "Department of Corporate Secretaryship and Accounting & Finance, ",
+  "Department of Defence and Strategic Studies, ",
+  "School of Education, ",
+  "Department of Economics, ",
+  "Department of English, , ",
+  "Department of Fashion Designing, ",
+  "Department of French, ",
+  "Department of Hindi, ",
+  "Institute of Hotel and Catering Management, ",
+  "Department of Journalism and Mass Communication, ",
+  "Department of Mathematics and Statistics, ",
+  "Department of Physical Education & Sports Sciences, ",
+  "Department of Psychology, ",
+  "Department of Social Work, ",
+  "Department of Tamil, ",
+  "Department of Visual Communication, ",
+  "Department of Yoga, "
 ];
 
 const EXAMS = [
-  "Cycle Test – I",
-  "Cycle Test – II",
+  "Cycle Test – I, ",
+  "Cycle Test – II, ",
   "Model Examination"
 ];
 
@@ -99,62 +99,62 @@ interface SyllabusCourse {
 
 const COURSES_DATABASE: SyllabusCourse[] = [
   // SEMESTER 1
-  { code: "ULT24AE1J", title: "Tamil – I", sem: 1 },
-  { code: "ULH24AE1J", title: "Hindi – I", sem: 1 },
-  { code: "ULF24AE1J", title: "French – I", sem: 1 },
+  { code: "ULT24AE1J", title: "Tamil – I, ", sem: 1 },
+  { code: "ULH24AE1J", title: "Hindi – I, ", sem: 1 },
+  { code: "ULF24AE1J", title: "French – I, ", sem: 1 },
   { code: "ULE24AE1J", title: "English", sem: 1, course: "BCA", specialization: "CA" },
   { code: "ULE24AE1J", title: "English", sem: 1, course: "BSc" },
-  { code: "UCA24101J", title: "Digital Logic Design", sem: 1, course: "BCA", specialization: "CA" },
-  { code: "USA24102J", title: "Programming for Problem Solving", sem: 1, course: "BCA", specialization: "CA" },
-  { code: "UMS24101T", title: "Discrete Mathematical Structures", sem: 1, course: "BCA", specialization: "CA" },
-  { code: "UCD24S01J", title: "Verbal Ability and Skill Development", sem: 1 },
-  { code: "ULE24AE2J", title: "Business English", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UDS24101J", title: "Programming using Java", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UDS24102J", title: "Fundamentals of Data Science", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UMS24103T", title: "Mathematics for Artificial Intelligence", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UCA24101J", title: "Digital Logic Design, ", sem: 1, course: "BCA", specialization: "CA" },
+  { code: "USA24102J", title: "Programming for Problem Solving, , ", sem: 1, course: "BCA", specialization: "CA" },
+  { code: "UMS24101T", title: "Discrete Mathematical Structures, , ", sem: 1, course: "BCA", specialization: "CA" },
+  { code: "UCD24S01J", title: "Verbal Ability and Skill Development, ", sem: 1 },
+  { code: "ULE24AE2J", title: "Business English, ", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UDS24101J", title: "Programming using Java, ", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UDS24102J", title: "Fundamentals of Data Science, ", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UMS24103T", title: "Mathematics for Artificial Intelligence, , ", sem: 1, course: "BCA", specialization: "DATA SCIENCE" },
   { code: "ULE24AE2J", title: "Business English", sem: 1, course: "BCA", specialization: "GEN AI" },
   { code: "UDS24101J", title: "Programming using Java", sem: 1, course: "BCA", specialization: "GEN AI" },
-  { code: "UGI24102J", title: "Generative Artificial Intelligence", sem: 1, course: "BCA", specialization: "GEN AI" },
+  { code: "UGI24102J", title: "Generative Artificial Intelligence, ", sem: 1, course: "BCA", specialization: "GEN AI" },
   { code: "UMS24103T", title: "Mathematics for Artificial Intelligence", sem: 1, course: "BCA", specialization: "GEN AI" },
-  { code: "UAI24101J", title: "Computing Fundamentals", sem: 1, course: "BSc", specialization: "CS AI&ML" },
-  { code: "UAI24102J", title: "Introduction to Artificial Intelligence and Machine Learning", sem: 1, course: "BSc", specialization: "CS AI&ML" },
+  { code: "UAI24101J", title: "Computing Fundamentals, ", sem: 1, course: "BSc", specialization: "CS AI&ML" },
+  { code: "UAI24102J", title: "Introduction to Artificial Intelligence and Machine Learning, ", sem: 1, course: "BSc", specialization: "CS AI&ML" },
   { code: "UMS24103T", title: "Mathematics for Artificial Intelligence", sem: 1, course: "BSc", specialization: "CS AI&ML" },
-  { code: "USC24101J", title: "Hardware Maintenance and Troubleshooting", sem: 1, course: "BSc", specialization: "CS CYBER SECURITY" },
+  { code: "USC24101J", title: "Hardware Maintenance and Troubleshooting, ", sem: 1, course: "BSc", specialization: "CS CYBER SECURITY" },
   { code: "USA24102J", title: "Programming for Problem Solving", sem: 1, course: "BSc", specialization: "CS CYBER SECURITY" },
   { code: "UMS24101T", title: "Discrete Mathematical Structures", sem: 1, course: "BSc", specialization: "CS CYBER SECURITY" },
-  { code: "UCS24101J", title: "Digital Electronics", sem: 1, course: "BSc", specialization: "COMPUTER SCIENCE" },
+  { code: "UCS24101J", title: "Digital Electronics, ", sem: 1, course: "BSc", specialization: "COMPUTER SCIENCE" },
   { code: "USA24102J", title: "Programming for Problem Solving", sem: 1, course: "BSc", specialization: "COMPUTER SCIENCE" },
   { code: "UMS24101T", title: "Discrete Mathematical Structures", sem: 1, course: "BSc", specialization: "COMPUTER SCIENCE" },
 
   // SEMESTER 2
-  { code: "ULT24AE2J", title: "Tamil – II", sem: 2 },
-  { code: "ULH24AE2J", title: "Hindi – II", sem: 2 },
-  { code: "ULF24AE2J", title: "French – II", sem: 2 },
-  { code: "USA24201J", title: "Data Structures and Algorithms", sem: 2, course: "BCA", specialization: "CA" },
-  { code: "UCA24202J", title: "Object Oriented Programming", sem: 2, course: "BCA", specialization: "CA" },
-  { code: "UMS24202T", title: "Mathematical Foundation", sem: 2, course: "BCA", specialization: "CA" },
-  { code: "UCD24V01T", title: "Essentials of Artificial Intelligence", sem: 2 },
-  { code: "UCA24M01J", title: "Web Technology", sem: 2, course: "BCA", specialization: "CA" },
-  { code: "UCD24S02L", title: "Quantitative Aptitude and Logical Reasoning", sem: 2 },
-  { code: "UNS24Y01L", title: "NSS", sem: 2 },
-  { code: "UNC24Y01L", title: "NCC", sem: 2 },
-  { code: "UNO24Y01L", title: "NSO", sem: 2 },
-  { code: "UYG24Y01L", title: "YOGA", sem: 2 },
-  { code: "UDS24201J", title: "Elements of Distributed Data Processing", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "ULT24AE2J", title: "Tamil – II, ", sem: 2 },
+  { code: "ULH24AE2J", title: "Hindi – II, ", sem: 2 },
+  { code: "ULF24AE2J", title: "French – II, ", sem: 2 },
+  { code: "USA24201J", title: "Data Structures and Algorithms, , , , , ", sem: 2, course: "BCA", specialization: "CA" },
+  { code: "UCA24202J", title: "Object Oriented Programming, ", sem: 2, course: "BCA", specialization: "CA" },
+  { code: "UMS24202T", title: "Mathematical Foundation, ", sem: 2, course: "BCA", specialization: "CA" },
+  { code: "UCD24V01T", title: "Essentials of Artificial Intelligence, ", sem: 2 },
+  { code: "UCA24M01J", title: "Web Technology, ", sem: 2, course: "BCA", specialization: "CA" },
+  { code: "UCD24S02L", title: "Quantitative Aptitude and Logical Reasoning, ", sem: 2 },
+  { code: "UNS24Y01L", title: "NSS, ", sem: 2 },
+  { code: "UNC24Y01L", title: "NCC, ", sem: 2 },
+  { code: "UNO24Y01L", title: "NSO, ", sem: 2 },
+  { code: "UYG24Y01L", title: "YOGA, ", sem: 2 },
+  { code: "UDS24201J", title: "Elements of Distributed Data Processing, ", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
   { code: "UDS24202J", title: "Data Structures and Algorithms", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UMS24203T", title: "Statistics for Artificial Intelligence", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UDS24M01J", title: "Internet of Things", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
-  { code: "UGI24201J", title: "Machine Learning for Natural Language Processing", sem: 2, course: "BCA", specialization: "GEN AI" },
+  { code: "UMS24203T", title: "Statistics for Artificial Intelligence, , , ", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UDS24M01J", title: "Internet of Things, ", sem: 2, course: "BCA", specialization: "DATA SCIENCE" },
+  { code: "UGI24201J", title: "Machine Learning for Natural Language Processing, ", sem: 2, course: "BCA", specialization: "GEN AI" },
   { code: "UDS24202J", title: "Data Structures and Algorithms", sem: 2, course: "BCA", specialization: "GEN AI" },
   { code: "UMS24203T", title: "Statistics for Artificial Intelligence", sem: 2, course: "BCA", specialization: "GEN AI" },
-  { code: "UGI24M01J", title: "Advance Excel and Power BI", sem: 2, course: "BCA", specialization: "GEN AI" },
+  { code: "UGI24M01J", title: "Advance Excel and Power BI, ", sem: 2, course: "BCA", specialization: "GEN AI" },
   { code: "USA24201J", title: "Data Structures and Algorithms", sem: 2, course: "BSc", specialization: "CS AI&ML" },
-  { code: "UCS24202J", title: "Object Oriented Programming using Java", sem: 2, course: "BSc", specialization: "CS AI&ML" },
+  { code: "UCS24202J", title: "Object Oriented Programming using Java, , ", sem: 2, course: "BSc", specialization: "CS AI&ML" },
   { code: "UMS24203T", title: "Statistics for Artificial Intelligence", sem: 2, course: "BSc", specialization: "CS AI&ML" },
-  { code: "UCS24M01J", title: "Introduction to ICT Tools", sem: 2, course: "BSc", specialization: "CS AI&ML" },
-  { code: "USC24201T", title: "Office Productivity Software", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
+  { code: "UCS24M01J", title: "Introduction to ICT Tools, , ", sem: 2, course: "BSc", specialization: "CS AI&ML" },
+  { code: "USC24201T", title: "Office Productivity Software, ", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
   { code: "UCS24202J", title: "Object Oriented Programming using Java", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
-  { code: "USC24202J", title: "Introduction to Cyber Security", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
+  { code: "USC24202J", title: "Introduction to Cyber Security, ", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
   { code: "UCS24M01J", title: "Introduction to ICT Tools", sem: 2, course: "BSc", specialization: "CS CYBER SECURITY" },
   { code: "USA24201J", title: "Data Structures and Algorithms", sem: 2, course: "BSc", specialization: "COMPUTER SCIENCE" },
   { code: "UCS24202J", title: "Object Oriented Programming using Java", sem: 2, course: "BSc", specialization: "COMPUTER SCIENCE" },
@@ -410,42 +410,42 @@ const COURSES_DATABASE: SyllabusCourse[] = [
   // Semester IV
   { code: "PCA25P02L", title: "Project Work", sem: 4, course: "MCA", specialization: "CA" },
 
-  // MCA GENERATIVE ARTIFICIAL INTELIGENCE
+  // MCA GENERATIVE ARTIFICIAL INTELLIGENCE
   // Semester I
-  { code: "PCA25C01J", title: "Object Oriented Programming using Java", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C02T", title: "Data Structures and Algorithms", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C03J", title: "Database Technology", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D01J", title: "Introduction to Computer Vision", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D02J", title: "Intelligent Language Processing", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D03J", title: "Intelligent Internet of Things (IIoT)", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G01T", title: "Deep Neural Networks", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G02T", title: "Building GPT Powered Business Applications", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G03T", title: "Cloud Infrastructure for Generative AI", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25S01J", title: "Generative AI and Open AI", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCD25AE1T", title: "Comprehensive Skills in Quantitative and Logical Reasoning", sem: 1, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
+  { code: "PCA25C01J", title: "Object Oriented Programming using Java", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C02T", title: "Data Structures and Algorithms", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C03J", title: "Database Technology", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D01J", title: "Introduction to Computer Vision", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D02J", title: "Intelligent Language Processing", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D03J", title: "Intelligent Internet of Things (IIoT)", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G01T", title: "Deep Neural Networks", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G02T", title: "Building GPT Powered Business Applications", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G03T", title: "Cloud Infrastructure for Generative AI", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25S01J", title: "Generative AI and Open AI", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCD25AE1T", title: "Comprehensive Skills in Quantitative and Logical Reasoning", sem: 1, course: "MCA", specialization: "Generative Artificial Intelligence" },
   // Semester II
-  { code: "PCA25C04J", title: "Data Analysis using Python Programming", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C05T", title: "Optimization Techniques", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C06J", title: "Advanced Operating System", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C07J", title: "Artificial Intelligence and Machine Learning", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D04J", title: "Augmented Reality and Virtual Reality", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D05J", title: "Generative AI and Large Language Models", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D06J", title: "IoT Cloud Infrastructure and Protocols", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25S02J", title: "Prompt Engineering in Generative AI", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCD25AE2T", title: "Soft Skills and Verbal Mastery", sem: 2, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
+  { code: "PCA25C04J", title: "Data Analysis using Python Programming", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C05T", title: "Optimization Techniques", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C06J", title: "Advanced Operating System", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C07J", title: "Artificial Intelligence and Machine Learning", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D04J", title: "Augmented Reality and Virtual Reality", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D05J", title: "Generative AI and Large Language Models", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D06J", title: "IoT Cloud Infrastructure and Protocols", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25S02J", title: "Prompt Engineering in Generative AI", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCD25AE2T", title: "Soft Skills and Verbal Mastery", sem: 2, course: "MCA", specialization: "Generative Artificial Intelligence" },
   // Semester III
-  { code: "PCA25C08J", title: "Data Communication Networks", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C09T", title: "Cloud and Quantum Computing", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PCA25C10L", title: "Capstone Project", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D07J", title: "Computer Vision in Smart Robotics", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D08J", title: "Building Conversational AI for Human Resources", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25D09J", title: "IoT Devices with Computer Vision Technologies", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G04T", title: "Data Engineering and Analytics", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G05T", title: "Distributed Data Processing Systems", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25G06T", title: "Quantum Machine Learning", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
-  { code: "PGI25P01L", title: "Internship", sem: 3, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
+  { code: "PCA25C08J", title: "Data Communication Networks", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C09T", title: "Cloud and Quantum Computing", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PCA25C10L", title: "Capstone Project", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D07J", title: "Computer Vision in Smart Robotics", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D08J", title: "Building Conversational AI for Human Resources", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25D09J", title: "IoT Devices with Computer Vision Technologies", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G04T", title: "Data Engineering and Analytics", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G05T", title: "Distributed Data Processing Systems", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25G06T", title: "Quantum Machine Learning", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
+  { code: "PGI25P01L", title: "Internship", sem: 3, course: "MCA", specialization: "Generative Artificial Intelligence" },
   // Semester IV
-  { code: "PGI25P02L", title: "Project Work", sem: 4, course: "MCA", specialization: "Genarative Aritifical Intelligence" },
+  { code: "PGI25P02L", title: "Project Work", sem: 4, course: "MCA", specialization: "Generative Artificial Intelligence" },
 
   // MSC APPLIED DATA SCIENCE
   // Semester I
@@ -484,40 +484,40 @@ const COURSES_DATABASE: SyllabusCourse[] = [
 
   // MSc Computer Science with Specialization in Full Stack Development (FSD)
   // Semester I
-  { code: "PCS25C11J", title: "Data Structures and Algorithms", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCS25C12J", title: "Java Programming", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCS25C13J", title: "Computer Networks", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D11J", title: "Web Development Fundamentals", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D12J", title: "Agile Methodologies", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D13J", title: "Front End Frameworks", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25G11J", title: "REST and GraphQL API Development", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25G12T", title: "Innovation in Startup Skills", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25G13T", title: "Ethical Hacking", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCD25AE1T", title: "Comprehensive Skills in Quantitative and Logical Reasoning", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25S11J", title: "Linux Administration and Shell Scripting", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
+  { code: "PCS25C11J", title: "Data Structures and Algorithms", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCS25C12J", title: "Java Programming", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCS25C13J", title: "Computer Networks", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D11J", title: "Web Development Fundamentals", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D12J", title: "Agile Methodologies", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D13J", title: "Front End Frameworks", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25G11J", title: "REST and GraphQL API Development", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25G12T", title: "Innovation in Startup Skills", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25G13T", title: "Ethical Hacking", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCD25AE1T", title: "Comprehensive Skills in Quantitative and Logical Reasoning", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25S11J", title: "Linux Administration and Shell Scripting", sem: 1, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
   // Semester II
-  { code: "PCS25C21J", title: "Open Source Technology", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25C22T", title: "Software Engineering", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25C23J", title: "Introduction to Databases for Back-End Development", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25C24J", title: "Python Programming", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D21J", title: "Software Testing", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D22J", title: "AI and ML for Web Applications", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D23J", title: "Web Security", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25S21J", title: "Version Control System", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCD25AE2T", title: "Soft Skills and Verbal Mastery", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
+  { code: "PCS25C21J", title: "Open Source Technology", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25C22T", title: "Software Engineering", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25C23J", title: "Introduction to Databases for Back-End Development", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25C24J", title: "Python Programming", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D21J", title: "Software Testing", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D22J", title: "AI and ML for Web Applications", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D23J", title: "Web Security", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25S21J", title: "Version Control System", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCD25AE2T", title: "Soft Skills and Verbal Mastery", sem: 2, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
   // Semester III
-  { code: "PFS25C31J", title: "DevOps", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCS25C32J", title: "Compiler Design", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25C33J", title: "Principles of UX/UI Design", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D31J", title: "Mobile Application Development", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D32J", title: "Blockchain", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25D33J", title: "IoT and Edge Computing", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25G34J", title: "JavaScript", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCS25G35J", title: "Responsible AI", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PFS25G36J", title: "MongoDB", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
-  { code: "PCS25P31L", title: "Internship", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
+  { code: "PFS25C31J", title: "DevOps", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCS25C32J", title: "Compiler Design", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25C33J", title: "Principles of UX/UI Design", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D31J", title: "Mobile Application Development", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D32J", title: "Blockchain", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25D33J", title: "IoT and Edge Computing", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25G34J", title: "JavaScript", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCS25G35J", title: "Responsible AI", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PFS25G36J", title: "MongoDB", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
+  { code: "PCS25P31L", title: "Internship", sem: 3, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
   // Semester IV
-  { code: "PCS25P41L", title: "Project Work", sem: 4, course: "MSc", specialization: "Computer Science with Specialization in Full Stack DevelopmenT" },
+  { code: "PCS25P41L", title: "Project Work", sem: 4, course: "MSc", specialization: "Computer Science with Specialization in Full Stack Development" },
 
   // MSc Computer Science (MSc CS)
   // Semester I
@@ -597,11 +597,11 @@ const COURSES_DATABASE: SyllabusCourse[] = [
 const COURSE_SPECIALIZATIONS: Record<string, string[]> = {
   BCA: ["CA", "DATA SCIENCE", "GEN AI"],
   BSC: ["COMPUTER SCIENCE", "CS AI&ML", "CS CYBER SECURITY"],
-  MCA: ["CA", "Genarative Aritifical Intelligence"],
+  MCA: ["CA", "Generative Artificial Intelligence"],
   MSC: [
     "COMPUTER SCIENCE",
     "APPLIED DATA SCIENCE",
-    "Computer Science with Specialization in Full Stack DevelopmenT",
+    "Computer Science with Specialization in Full Stack Development",
     "INFORMATION TECHNOLOGY"
   ]
 };
@@ -1172,7 +1172,6 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
           <div className="flex items-center gap-3">
             <div>
               <Image src="/logo.png" alt="Qedit" width={120} height={32} className="h-8 w-auto" priority />
-              <p className="text-[9px] text-center mt-0.5" style={{ color: '#b0b5be', letterSpacing: '0.5px' }}>Crafted with💚 by Chan&apos;s Team</p>
             </div>
           </div>
           <div className="flex gap-2 items-center">
@@ -1408,12 +1407,8 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                       <option value="BBA">BBA</option>
                       <option value="BCom">BCom</option>
                       <option value="BE">BE</option>
-                      <option value="BTech">BTech</option>
                       <option value="MCA">MCA</option>
                       <option value="MSc">MSc</option>
-                      <option value="MBA">MBA</option>
-                      <option value="ME">ME</option>
-                      <option value="MTech">MTech</option>
                     </select>
 
                     {specsList.length > 0 && !customSpecEntry ? (
@@ -1449,7 +1444,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                         {specsList.map(spec => (
                           <option key={spec} value={spec}>{spec}</option>
                         ))}
-                        <option value="custom">✍ Custom...</option>
+                        <option value="custom">Custom...</option>
                       </select>
                     ) : (
                       <div className="relative flex items-center w-full">
@@ -1585,7 +1580,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           {c.code} - {c.title}
                         </option>
                       ))}
-                      <option value="manual">✍ Enter Manually...</option>
+                      <option value="manual">Enter Manually...</option>
                     </select>
                   ) : (
                     <input

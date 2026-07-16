@@ -98,6 +98,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           {showBlCoPo && (
             <div className="flex font-bold mb-2 text-right" style={{ fontSize: '0.85em' }}>
               <div className="flex-1 text-left"></div>
+              <div className="w-8 text-center">BL</div>
               <div className="w-8 text-center">CO</div>
               <div className="w-8 text-center">PO</div>
             </div>
@@ -121,29 +122,39 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                       {question.orQuestion && <span className="font-bold mr-2">A.</span>}
                       {question.text}
                     </p>
-                    {question.subQuestions && question.subQuestions.length > 0 && (
-                      <div className="mt-1 space-y-1">
-                        {question.subQuestions.map((sub, sIdx) => (
-                          <div key={sub.id} className="flex gap-2">
-                            <span className="w-6 text-right shrink-0">{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
-                            <div className="flex-1 flex justify-between">
-                              <span>{sub.text}</span>
-                              <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
-                                {sub.marks ? `[${sub.marks}]` : ''}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   {showBlCoPo && (
                     <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
+                      <span className="w-8 text-center block">{question.bl || '1'}</span>
                       <span className="w-8 text-center block">{question.co}</span>
                       <span className="w-8 text-center block">{question.po}</span>
                     </div>
                   )}
                 </div>
+                {question.subQuestions && question.subQuestions.length > 0 && (
+                  <div className="mt-1 space-y-1">
+                    {question.subQuestions.map((sub, sIdx) => (
+                      <div key={sub.id} className="flex justify-between items-baseline">
+                        <div className="flex gap-2 flex-1 pr-4 text-justify">
+                          <span className="w-6 text-right shrink-0">{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
+                          <div className="flex-1 flex justify-between">
+                            <span>{sub.text}</span>
+                            <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
+                              {sub.marks ? `[${sub.marks}]` : ''}
+                            </span>
+                          </div>
+                        </div>
+                        {showBlCoPo && (
+                          <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
+                            <span className="w-8 text-center block">{sub.bl || '1'}</span>
+                            <span className="w-8 text-center block">{sub.co}</span>
+                            <span className="w-8 text-center block">{sub.po}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {question.orQuestion && (
                   <div className="my-2 text-center">
                     <span className="font-bold uppercase my-1 block">(OR)</span>
@@ -154,6 +165,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                       </p>
                       {showBlCoPo && (
                         <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
+                          <span className="w-8 text-center block">{question.orQuestion.bl || '1'}</span>
                           <span className="w-8 text-center block">{question.orQuestion.co}</span>
                           <span className="w-8 text-center block">{question.orQuestion.po}</span>
                         </div>

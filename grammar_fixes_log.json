@@ -1,0 +1,387 @@
+[
+  {
+    "file": "components/Editor.tsx",
+    "original": "Faculty of Science and Humanities, KTR",
+    "correction": "Faculty of Science and Humanities, KTRR"
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Computer Applications",
+    "correction": "Department of Computer Applications, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Biochemistry",
+    "correction": "Department of Biochemistry, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Biotechnology",
+    "correction": "Department of Biotechnology, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Career Development Centre",
+    "correction": "Career Development Centre, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Commerce",
+    "correction": "Department of Commerce, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Computer Science",
+    "correction": "Department of Computer Science, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Corporate Secretaryship and Accounting & Finance",
+    "correction": "Department of Corporate Secretaryship and Accounting & Finance, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Defence and Strategic Studies",
+    "correction": "Department of Defence and Strategic Studies, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "School of Education",
+    "correction": "School of Education, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Economics",
+    "correction": "Department of Economics, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of English",
+    "correction": "Department of English, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Fashion Designing",
+    "correction": "Department of Fashion Designing, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of French",
+    "correction": "Department of French, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Hindi",
+    "correction": "Department of Hindi, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Institute of Hotel and Catering Management",
+    "correction": "Institute of Hotel and Catering Management, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Journalism and Mass Communication",
+    "correction": "Department of Journalism and Mass Communication, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Mathematics and Statistics",
+    "correction": "Department of Mathematics and Statistics, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Physical Education & Sports Sciences",
+    "correction": "Department of Physical Education & Sports Sciences, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department Of Psychology",
+    "correction": "Department Of Psychology, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Social Work",
+    "correction": "Department of Social Work, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Tamil",
+    "correction": "Department of Tamil, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Visual Communication",
+    "correction": "Department of Visual Communication, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Department of Yoga",
+    "correction": "Department of Yoga, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Cycle Test – I",
+    "correction": "Cycle Test – I, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Cycle Test – II",
+    "correction": "Cycle Test – II, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Model Examination",
+    "correction": "Model Examination, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Tamil – I",
+    "correction": "Tamil – I, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Hindi – I",
+    "correction": "Hindi – I, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "French – I",
+    "correction": "French – I, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "English",
+    "correction": "English, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Digital Logic Design",
+    "correction": "Digital Logic Design, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Programming for Problem Solving",
+    "correction": "Programming for Problem Solving, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Discrete Mathematical Structures",
+    "correction": "Discrete Mathematical Structures, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Verbal Ability and Skill Development",
+    "correction": "Verbal Ability and Skill Development, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Business English",
+    "correction": "Business English, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Programming using Java",
+    "correction": "Programming using Java, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Fundamentals of Data Science",
+    "correction": "Fundamentals of Data Science, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Mathematics for Artificial Intelligence",
+    "correction": "Mathematics for Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Generative Artificial Intelligence",
+    "correction": "Generative Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Computing Fundamentals",
+    "correction": "Computing Fundamentals, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Introduction to Artificial Intelligence and Machine Learning",
+    "correction": "Introduction to Artificial Intelligence and Machine Learning, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Mathematics for Artificial Intelligence",
+    "correction": "Mathematics for Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Hardware Maintenance and Troubleshooting",
+    "correction": "Hardware Maintenance and Troubleshooting, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Programming for Problem Solving",
+    "correction": "Programming for Problem Solving, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Discrete Mathematical Structures",
+    "correction": "Discrete Mathematical Structures, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Digital Electronics",
+    "correction": "Digital Electronics, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Tamil – II",
+    "correction": "Tamil – II, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Hindi – II",
+    "correction": "Hindi – II, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "French – II",
+    "correction": "French – II, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Data Structures and Algorithms",
+    "correction": "Data Structures and Algorithms, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Object Oriented Programming",
+    "correction": "Object Oriented Programming, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Mathematical Foundation",
+    "correction": "Mathematical Foundation, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Essentials of Artificial Intelligence",
+    "correction": "Essentials of Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Web Technology",
+    "correction": "Web Technology, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Quantitative Aptitude and Logical Reasoning",
+    "correction": "Quantitative Aptitude and Logical Reasoning, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "NSS",
+    "correction": "NSS, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "NCC",
+    "correction": "NCC, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "NSO",
+    "correction": "NSO, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "YOGA",
+    "correction": "YOGA, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Elements of Distributed Data Processing",
+    "correction": "Elements of Distributed Data Processing, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Data Structures and Algorithms",
+    "correction": "Data Structures and Algorithms, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Statistics for Artificial Intelligence",
+    "correction": "Statistics for Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Internet of Things",
+    "correction": "Internet of Things, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Machine Learning for Natural Language Processing",
+    "correction": "Machine Learning for Natural Language Processing, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Data Structures and Algorithms",
+    "correction": "Data Structures and Algorithms, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Statistics for Artificial Intelligence",
+    "correction": "Statistics for Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Advance Excel and Power BI",
+    "correction": "Advance Excel and Power BI, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Data Structures and Algorithms",
+    "correction": "Data Structures and Algorithms, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Object Oriented Programming using Java",
+    "correction": "Object Oriented Programming using Java, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Statistics for Artificial Intelligence",
+    "correction": "Statistics for Artificial Intelligence, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Introduction to ICT Tools",
+    "correction": "Introduction to ICT Tools, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Office Productivity Software",
+    "correction": "Office Productivity Software, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Object Oriented Programming using Java",
+    "correction": "Object Oriented Programming using Java, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Introduction to Cyber Security",
+    "correction": "Introduction to Cyber Security, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Introduction to ICT Tools",
+    "correction": "Introduction to ICT Tools, "
+  },
+  {
+    "file": "components/Editor.tsx",
+    "original": "Data Structures and Algorithms",
+    "correction": "Data Structures and Algorithms, "
+  }
+]
