@@ -1670,7 +1670,27 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                   </div>
                 </div>
 
-                <ul className="space-y-1.5 text-sm">
+                <ul
+                  className="space-y-1.5 text-sm min-h-[50px]"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const sourceSectionId = e.dataTransfer.getData('sectionId');
+                    const sourceIndexStr = e.dataTransfer.getData('questionIndex');
+                    if (!sourceSectionId || !sourceIndexStr) return;
+                    const sourceIndex = parseInt(sourceIndexStr, 10);
+                    if (isNaN(sourceIndex) || sourceIndex < 0 || sourceIndex >= section.questions.length) return;
+
+                    if (sourceSectionId === section.id) {
+                      const newQuestions = [...section.questions];
+                      const [moved] = newQuestions.splice(sourceIndex, 1);
+                      if (moved) {
+                        newQuestions.push(moved);
+                        updateSectionField(section.id, 'questions', newQuestions);
+                      }
+                    }
+                  }}
+                >
                   {section.questions.map((q, i) => (
                     <li
                       key={q.id}
@@ -1682,14 +1702,20 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         const sourceSectionId = e.dataTransfer.getData('sectionId');
-                        const sourceIndex = parseInt(e.dataTransfer.getData('questionIndex'));
+                        const sourceIndexStr = e.dataTransfer.getData('questionIndex');
+                        if (!sourceSectionId || !sourceIndexStr) return;
+                        const sourceIndex = parseInt(sourceIndexStr, 10);
+                        if (isNaN(sourceIndex) || sourceIndex < 0 || sourceIndex >= section.questions.length) return;
 
                         if (sourceSectionId === section.id && sourceIndex !== i) {
                           const newQuestions = [...section.questions];
                           const [moved] = newQuestions.splice(sourceIndex, 1);
-                          newQuestions.splice(i, 0, moved);
-                          updateSectionField(section.id, 'questions', newQuestions);
+                          if (moved) {
+                            newQuestions.splice(i, 0, moved);
+                            updateSectionField(section.id, 'questions', newQuestions);
+                          }
                         }
                       }}
                       className="flex justify-between items-start pb-1.5 cursor-move rounded px-1.5 py-1 transition-colors"

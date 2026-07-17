@@ -69,6 +69,26 @@ export function cleanEndingPunctuation(text: string): string {
 }
 
 /**
+ * Strips known sub-question and marks prefixes from the start of a question.
+ * Handles patterns like "1.", "(a)", "a)", "i)", "[Q1]", "[5 Marks]", etc.
+ */
+export function cleanLeadingPrefix(text: string): string {
+  let cleaned = text.trim();
+  
+  while (true) {
+    const prev = cleaned;
+    // Strip bullet numbers/letters like "1.", "(a)", "a)", "i)", "A.", "i."
+    cleaned = cleaned.replace(/^\(?([0-9a-zA-Z]+|\d+[a-z]?)[.)]\s*/, '');
+    // Strip brackets like "[Q1]" or "[5 Marks]" or "[5]"
+    cleaned = cleaned.replace(/^\[[^\]]+\]\s*/, '');
+    
+    if (cleaned === prev) break;
+  }
+  
+  return cleaned;
+}
+
+/**
  * Detects the correct academic punctuation type for a given question.
  * Returns '?', '.', or ':'
  *
@@ -79,8 +99,12 @@ export function detectQuestionType(text: string): '?' | '.' | ':' {
   const cleaned = cleanEndingPunctuation(text).trim();
   if (!cleaned) return '.';
 
+  // Strip leading numbering/marks prefixes to get the true starting text
+  const trueStart = cleanLeadingPrefix(cleaned).trim();
+  if (!trueStart) return '.';
+
   // Normalise: lowercase for matching, preserve original for output
-  const lower = cleaned.toLowerCase();
+  const lower = trueStart.toLowerCase();
 
   // Rule 3 first — multi-word phrases (must come before single-word checks)
   for (const phrase of INTRO_PHRASE_STARTERS) {

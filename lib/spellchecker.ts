@@ -92,9 +92,10 @@ export function checkText(text: string): SpellError[] {
       suggestionCache.set(word, suggestions);
     }
 
+    const matchOffset = raw.indexOf(word);
     errors.push({
       word,
-      index: match.index + (raw.length - word.length),
+      index: match.index + (matchOffset >= 0 ? matchOffset : 0),
       length: word.length,
       suggestions,
     });

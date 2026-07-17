@@ -10,6 +10,7 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
+    const mouseDownOnBackdrop = useRef(false);
 
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
@@ -33,7 +34,14 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         <div 
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             style={{ backgroundColor: 'rgba(26, 26, 46, 0.4)', backdropFilter: 'blur(2px)' }}
-            onClick={onClose}
+            onMouseDown={(e) => {
+                mouseDownOnBackdrop.current = (e.target === e.currentTarget);
+            }}
+            onClick={(e) => {
+                if (e.target === e.currentTarget && mouseDownOnBackdrop.current) {
+                    onClose();
+                }
+            }}
         >
             <div 
                 ref={modalRef}

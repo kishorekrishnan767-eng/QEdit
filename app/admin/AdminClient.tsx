@@ -47,6 +47,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   const [reviewActionLoading, setReviewActionLoading] = useState<string | null>(null);
   const [previewPaper, setPreviewPaper] = useState<QuestionPaperRecord | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const previewBackdropMouseDown = useRef(false);
   const [userFilter, setUserFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'admin'>('pending');
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -1187,7 +1188,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                 ) : (
                   <div>
                     {/* Table Header */}
-                    <div className="grid grid-cols-[1fr_200px_130px_130px_160px] gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50">
+                    <div className="grid grid-cols-[1fr_200px_120px_130px_250px] gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Paper Title</span>
                       <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Owner</span>
                       <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Submitted</span>
@@ -1202,7 +1203,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                         const isApproving = reviewActionLoading === paper.id + 'approve';
                         const isRejecting = reviewActionLoading === paper.id + 'reject';
                         return (
-                          <div key={paper.id} className="grid grid-cols-[1fr_200px_130px_130px_160px] gap-4 items-center px-6 py-4 hover:bg-gray-50 transition-colors">
+                          <div key={paper.id} className="grid grid-cols-[1fr_200px_120px_130px_250px] gap-4 items-center px-6 py-4 hover:bg-gray-50 transition-colors">
                             {/* Title */}
                             <div className="min-w-0 flex items-center gap-2">
                               <p className="text-sm font-bold text-gray-900 truncate">{paper.title}</p>
@@ -1274,7 +1275,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                                 title="Approve"
                               >
                                 {isApproving ? <RefreshCw size={10} className="animate-spin" /> : <CheckCircle size={10} />}
-                                {isApproving ? '' : 'OK'}
+                                {isApproving ? '' : 'Approve'}
                               </button>
                               {/* Reject */}
                               <button
@@ -1285,7 +1286,7 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                                 title="Reject"
                               >
                                 {isRejecting ? <RefreshCw size={10} className="animate-spin" /> : <XCircle size={10} />}
-                                {isRejecting ? '' : 'Rej'}
+                                {isRejecting ? '' : 'Reject'}
                               </button>
                             </div>
                           </div>
@@ -1306,7 +1307,14 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setPreviewPaper(null); }}
+          onMouseDown={(e) => {
+            previewBackdropMouseDown.current = (e.target === e.currentTarget);
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && previewBackdropMouseDown.current) {
+              setPreviewPaper(null);
+            }
+          }}
         >
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
