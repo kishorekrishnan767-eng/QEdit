@@ -3,11 +3,14 @@
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   LogOut, Shield, Users, UserCheck, UserX, Plus,
-  RefreshCw, Clock, CheckCircle, XCircle, Trash2, Database, Settings, BookOpen, LayoutDashboard, Search, ChevronRight, Mail, Save
+  RefreshCw, Clock, CheckCircle, XCircle, Trash2, Database, Settings, BookOpen, LayoutDashboard, Search, ChevronRight, Mail, Save, Download, Eye, CheckCircle2, AlertCircle, FileText, Pencil
 } from 'lucide-react';
+import Preview from '@/components/Preview';
+import { exportToPDF } from '@/lib/pdfExport';
+import { PaperData, QuestionPaperRecord, ReviewStatus } from '@/types';
 
 interface AdminClientProps {
   user: { email: string; name: string };
@@ -34,7 +37,16 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   const supabase = createClient();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<'users' | 'mcq' | 'settings' | 'inquiries'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'mcq' | 'settings' | 'inquiries' | 'cycle_test_1' | 'cycle_test_2' | 'model_exam'>('users');
+
+  // SysOps review state
+  const [reviewPapers, setReviewPapers] = useState<QuestionPaperRecord[]>([]);
+  const [loadingReview, setLoadingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewActionLoading, setReviewActionLoading] = useState<string | null>(null);
+  const [previewPaper, setPreviewPaper] = useState<QuestionPaperRecord | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [userFilter, setUserFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'admin'>('pending');
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -88,6 +100,99 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   useEffect(() => { 
     if (activeTab === 'inquiries') fetchInquiries();
   }, [activeTab]);
+
+  const REVIEW_TABS = ['cycle_test_1', 'cycle_test_2', 'model_exam'];
+
+  const fetchReviewPapers = async (category: string) => {
+    setLoadingReview(true);
+    setReviewError(null);
+    setReviewPapers([]);
+    try {
+      const res = await fetch(`/api/admin/papers?category=${category}`);
+      const data = await res.json();
+      if (res.ok) setReviewPapers(data.papers || []);
+      else setReviewError(data.error || 'Failed to load papers');
+    } catch {
+      setReviewError('Network error loading papers');
+    } finally {
+      setLoadingReview(false);
+    }
+  };
+
+  useEffect(() => {
+    if (REVIEW_TABS.includes(activeTab)) {
+      fetchReviewPapers(activeTab);
+      setReviewSearch('');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const filteredReviewPapers = useMemo(() => {
+    if (!reviewSearch.trim()) return reviewPapers;
+    const q = reviewSearch.toLowerCase();
+    return reviewPapers.filter(
+      p =>
+        p.title.toLowerCase().includes(q) ||
+        p.owner_email.toLowerCase().includes(q) ||
+        p.paper_data?.header?.courseCode?.toLowerCase().includes(q)
+    );
+  }, [reviewPapers, reviewSearch]);
+
+  const handleReviewAction = async (paperId: string, action: 'approve' | 'reject') => {
+    if (action === 'reject' && !confirm('Are you sure you want to reject this paper?')) return;
+    setReviewActionLoading(paperId + action);
+    try {
+      const res = await fetch(`/api/admin/papers/${paperId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReviewPapers(prev => prev.map(p =>
+          p.id === paperId ? { ...p, review_status: data.paper.review_status, reviewed_by: data.paper.reviewed_by, reviewed_at: data.paper.reviewed_at } : p
+        ));
+      } else {
+        alert(data.error || 'Action failed');
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    } finally {
+      setReviewActionLoading(null);
+    }
+  };
+
+  const handleAdminDownload = async (paper: QuestionPaperRecord) => {
+    if (!previewRef.current) {
+      alert('Preview container not available. Please try again.');
+      return;
+    }
+    // Set the preview paper to trigger render, then export
+    setPreviewPaper(paper);
+    // Wait for render
+    await new Promise(r => setTimeout(r, 500));
+    const success = await exportToPDF(previewRef.current, paper.paper_data as PaperData);
+    if (!success) alert('Failed to generate PDF. Please try again.');
+    setPreviewPaper(null);
+  };
+
+  const REVIEW_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    pending:  { label: 'Pending Review', color: '#d97706', bg: '#fff8e1', border: '#fde68a' },
+    approved: { label: 'Approved',       color: '#2a7d5f', bg: '#e8f5ee', border: '#c4e5d3' },
+    rejected: { label: 'Revisions Needed', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
@@ -333,13 +438,15 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
       
       {/* ── LEFT SIDEBAR ── */}
       <aside className="w-64 shrink-0 flex flex-col z-30" style={{ background: '#ffffff', borderRight: '1px solid #e2e5ea', boxShadow: '0 0 20px rgba(0,0,0,0.02)' }}>
-        <div className="p-6 pb-2">
-          <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => router.push('/dashboard')}>
-            <Image src="/logo.png" alt="QEdit" width={120} height={32} className="h-8 w-auto" priority />
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-widest"
-              style={{ background: '#e8f5ee', color: '#2a7d5f', border: '1px solid #c4e5d3' }}>
-              <Shield size={10} /> Sys-Ops
-            </span>
+        <div className="p-6 pb-4">
+          <div className="flex items-center gap-4 mb-2 cursor-pointer" onClick={() => router.push('/dashboard')}>
+            <div className="flex items-center gap-3">
+              <Image src="/logo.png" alt="QEdit" width={120} height={32} className="h-8 w-auto" priority />
+            </div>
+            <div className="h-6 w-px bg-[#2a7d5f] opacity-20 hidden sm:block"></div>
+            <div className="hidden sm:flex items-center opacity-90">
+              <Image src="/blacklive.png" alt="Livewires" width={140} height={40} className="h-6 sm:h-7 w-auto object-contain" priority />
+            </div>
           </div>
         </div>
 
@@ -351,6 +458,30 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
             ...(role === 'superadmin' ? [['inquiries', Mail, 'Inquiries']] : []),
             ['settings', Settings, 'System Settings'],
           ].map(([id, Icon, label]) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id as string}
+                onClick={() => setActiveTab(id as any)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                style={isActive 
+                  ? { background: 'linear-gradient(135deg, #2a7d5f 0%, #1e6b4f 100%)', color: '#ffffff', boxShadow: '0 4px 12px rgba(42,125,95,0.25)' }
+                  : { background: 'transparent', color: '#6b7280' }}
+                onMouseEnter={!isActive ? (e) => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#1a1a2e'; } : undefined}
+                onMouseLeave={!isActive ? (e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6b7280'; } : undefined}
+              >
+                <Icon size={18} style={{ opacity: isActive ? 1 : 0.7 }} />
+                {label as string}
+              </button>
+            );
+          })}
+
+          <div className="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Paper Review</div>
+          {([
+            ['cycle_test_1', FileText, 'Cycle Test-I'],
+            ['cycle_test_2', FileText, 'Cycle Test-II'],
+            ['model_exam', FileText, 'Model Exam'],
+          ] as const).map(([id, Icon, label]) => {
             const isActive = activeTab === id;
             return (
               <button
@@ -399,7 +530,13 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                 style={{ background: 'rgba(240, 247, 244, 0.85)', borderBottom: '1px solid rgba(226, 229, 234, 0.5)' }}>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-              {activeTab === 'users' ? 'User Management' : activeTab === 'mcq' ? 'MCQ Questions' : 'System Settings'}
+              {activeTab === 'users' ? 'User Management' 
+                : activeTab === 'mcq' ? 'MCQ Questions'
+                : activeTab === 'inquiries' ? 'Inquiries'
+                : activeTab === 'cycle_test_1' ? 'Cycle Test-I Papers'
+                : activeTab === 'cycle_test_2' ? 'Cycle Test-II Papers'
+                : activeTab === 'model_exam' ? 'Model Exam Papers'
+                : 'System Settings'}
             </h1>
             <p className="text-sm text-gray-500 mt-1 font-medium">Sys-Ops administrative center</p>
           </div>
@@ -1002,8 +1139,203 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
             </div>
           )}
 
+          {/* ── SYSOPS REVIEW TABS ── */}
+          {(['cycle_test_1', 'cycle_test_2', 'model_exam'] as const).includes(activeTab as any) && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Search + Refresh */}
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1 max-w-sm">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by title or owner email..."
+                    value={reviewSearch}
+                    onChange={(e) => setReviewSearch(e.target.value)}
+                    className="pl-9 pr-4 py-2 rounded-xl text-sm border border-gray-200 bg-white focus:bg-white outline-none w-full transition-all"
+                    onFocus={(e) => { e.currentTarget.style.borderColor = '#2a7d5f'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(42,125,95,0.1)'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; }}
+                  />
+                </div>
+                <button
+                  onClick={() => fetchReviewPapers(activeTab)}
+                  disabled={loadingReview}
+                  className="flex items-center justify-center p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-[#2a7d5f] hover:border-[#2a7d5f] transition-all disabled:opacity-50"
+                  title="Refresh"
+                >
+                  <RefreshCw size={16} className={loadingReview ? 'animate-spin' : ''} />
+                </button>
+              </div>
+
+              {/* Papers Table */}
+              <div className="rounded-2xl bg-white overflow-hidden" style={{ border: '1px solid #e9ecef', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                {loadingReview ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400">
+                    <RefreshCw size={24} className="animate-spin mb-3 text-[#2a7d5f]" />
+                    <p className="text-sm font-medium">Loading papers...</p>
+                  </div>
+                ) : reviewError ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-red-400">
+                    <XCircle size={32} className="mb-3" />
+                    <p className="text-sm font-bold">{reviewError}</p>
+                  </div>
+                ) : filteredReviewPapers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400">
+                    <FileText size={32} className="mb-3 text-gray-300" />
+                    <p className="text-sm font-bold text-gray-500">No papers submitted yet.</p>
+                    <p className="text-xs text-gray-400 mt-1">Papers appear here when users click "Save Final" on matching exam types.</p>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Table Header */}
+                    <div className="grid grid-cols-[1fr_200px_130px_130px_160px] gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Paper Title</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Owner</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Submitted</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Actions</span>
+                    </div>
+                    {/* Table Rows */}
+                    <div className="divide-y divide-gray-100">
+                      {filteredReviewPapers.map((paper) => {
+                        const rs = paper.review_status || 'pending';
+                        const cfg = REVIEW_STATUS_CONFIG[rs] || REVIEW_STATUS_CONFIG.pending;
+                        const isApproving = reviewActionLoading === paper.id + 'approve';
+                        const isRejecting = reviewActionLoading === paper.id + 'reject';
+                        return (
+                          <div key={paper.id} className="grid grid-cols-[1fr_200px_130px_130px_160px] gap-4 items-center px-6 py-4 hover:bg-gray-50 transition-colors">
+                            {/* Title */}
+                            <div className="min-w-0 flex items-center gap-2">
+                              <p className="text-sm font-bold text-gray-900 truncate">{paper.title}</p>
+                              {paper.paper_data?.header?.courseCode && (
+                                <span className="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]" title="Course Code">
+                                  {paper.paper_data.header.courseCode}
+                                </span>
+                              )}
+                            </div>
+                            {/* Owner */}
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium text-gray-500 truncate">{paper.owner_email}</p>
+                            </div>
+                            {/* Submitted */}
+                            <div>
+                              <p className="text-xs font-medium text-gray-500">
+                                {paper.submitted_at ? formatTimeAgo(paper.submitted_at) : '—'}
+                              </p>
+                            </div>
+                            {/* Status */}
+                            <div>
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
+                                style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}
+                              >
+                                {rs === 'approved' && <CheckCircle2 size={10} />}
+                                {rs === 'pending' && <Clock size={10} />}
+                                {rs === 'rejected' && <XCircle size={10} />}
+                                {cfg.label}
+                              </span>
+                              {paper.reviewed_by && rs !== 'pending' && (
+                                <p className="text-[10px] text-gray-400 mt-1 truncate max-w-[120px]" title={paper.reviewed_by}>
+                                  by {paper.reviewed_by}
+                                </p>
+                              )}
+                            </div>
+                            {/* Actions */}
+                            <div className="flex items-center gap-1.5">
+                              {/* Preview */}
+                              <button
+                                onClick={() => setPreviewPaper(paper)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-[#2a7d5f] hover:bg-green-50 transition-all"
+                                title="Preview Paper"
+                              >
+                                <Eye size={14} />
+                              </button>
+                              {/* Edit */}
+                              <button
+                                onClick={() => router.push(`/dashboard/edit/${paper.id}`)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                                title="Edit Paper"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              {/* Download */}
+                              <button
+                                onClick={() => handleAdminDownload(paper)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-[#2a7d5f] hover:bg-green-50 transition-all"
+                                title="Download PDF"
+                              >
+                                <Download size={14} />
+                              </button>
+                              {/* Approve */}
+                              <button
+                                onClick={() => handleReviewAction(paper.id, 'approve')}
+                                disabled={!!reviewActionLoading || rs === 'approved'}
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all disabled:opacity-40"
+                                style={{ background: '#e8f5ee', color: '#2a7d5f', border: '1px solid #c4e5d3' }}
+                                title="Approve"
+                              >
+                                {isApproving ? <RefreshCw size={10} className="animate-spin" /> : <CheckCircle size={10} />}
+                                {isApproving ? '' : 'OK'}
+                              </button>
+                              {/* Reject */}
+                              <button
+                                onClick={() => handleReviewAction(paper.id, 'reject')}
+                                disabled={!!reviewActionLoading || rs === 'rejected'}
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all disabled:opacity-40"
+                                style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
+                                title="Reject"
+                              >
+                                {isRejecting ? <RefreshCw size={10} className="animate-spin" /> : <XCircle size={10} />}
+                                {isRejecting ? '' : 'Rej'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
       </main>
+
+      {/* ── PAPER PREVIEW MODAL ── */}
+      {previewPaper && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewPaper(null); }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">{previewPaper.title}</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Read-only preview · Owner: {previewPaper.owner_email}</p>
+              </div>
+              <button
+                onClick={() => setPreviewPaper(null)}
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <Preview data={previewPaper.paper_data as PaperData} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden preview for PDF download */}
+      <div
+        ref={previewRef}
+        style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '794px', zIndex: -1 }}
+        aria-hidden="true"
+      >
+        {previewPaper && <Preview data={previewPaper.paper_data as PaperData} />}
+      </div>
     </div>
   );
 }

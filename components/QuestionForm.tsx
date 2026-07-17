@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { Question } from "@/types";
 import SpellCheckedTextarea from "./SpellCheckedTextarea";
+import { applyAcademicPunctuation } from "@/lib/utils/questionPunctuation";
 
 interface QuestionFormProps {
   onAddQuestion: (question: Question) => void;
@@ -26,7 +27,12 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
   const [isGeneratingBl, setIsGeneratingBl] = useState(false);
   const [isGeneratingOrBl, setIsGeneratingOrBl] = useState(false);
   const [blError, setBlError] = useState<string | null>(null);
-  
+
+  // Auto Punctuation — blur-triggered suggestion state
+  const [mainSuggestion, setMainSuggestion] = useState<string | null>(null);
+  const [orSuggestion, setOrSuggestion] = useState<string | null>(null);
+  const [subSuggestion, setSubSuggestion] = useState<{ idx: number; value: string } | null>(null);
+
   // Complex Question States
   const [hasOrQuestion, setHasOrQuestion] = useState(false);
   const [orQuestionText, setOrQuestionText] = useState("");
@@ -91,11 +97,14 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     e.preventDefault();
     if (!text.trim()) return;
 
+    // Auto-apply correct punctuation on save (silent, no user action needed)
+    const correctedText = capitalizeFirstLetter(applyAcademicPunctuation(text));
+
     let orQuestionObj: Question | undefined = undefined;
     if (hasOrQuestion && orQuestionText.trim()) {
         orQuestionObj = {
             id: crypto.randomUUID(),
-            text: capitalizeFirstLetter(orQuestionText),
+            text: capitalizeFirstLetter(applyAcademicPunctuation(orQuestionText)),
             marks: marks,
             type: type,
             bl: orQuestionBl,
@@ -104,9 +113,16 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
         };
     }
 
+    const correctedSubs = hasSubQuestions
+      ? subQuestions.map(sub => ({
+          ...sub,
+          text: sub.text.trim() ? capitalizeFirstLetter(applyAcademicPunctuation(sub.text)) : sub.text,
+        }))
+      : undefined;
+
     const newQuestion: Question = {
       id: editingQuestion ? editingQuestion.id : crypto.randomUUID(),
-      text: capitalizeFirstLetter(text),
+      text: correctedText,
       marks: marks,
       type,
       options: type === "mcq" ? options.map(capitalizeFirstLetter).filter((opt) => opt.trim() !== "") : undefined,
@@ -114,7 +130,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       co,
       po,
       orQuestion: orQuestionObj,
-      subQuestions: hasSubQuestions ? subQuestions : undefined
+      subQuestions: correctedSubs
     };
 
     onAddQuestion(newQuestion);
@@ -129,12 +145,35 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
         setOrQuestionText("");
         setHasSubQuestions(false);
         setSubQuestions([]);
+        setMainSuggestion(null);
+        setOrSuggestion(null);
+        setSubSuggestion(null);
     }
   };
 
   const capitalizeFirstLetter = (string: string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
+  // Real-time punctuation checker:
+  // Shows suggestion chip only when the text already ends with a punctuation char
+  // AND the detected correct punctuation differs from what's there.
+  const PUNCT_CHARS = /[.?!:;,]+$/;
+
+  const checkRealTimeSuggestion = (
+    val: string,
+    setSuggestion: (s: string | null) => void
+  ) => {
+    const trimmed = val.trim();
+    if (!trimmed || !PUNCT_CHARS.test(trimmed)) {
+      // User hasn't typed punctuation yet — don't show anything
+      setSuggestion(null);
+      return;
+    }
+    const suggested = applyAcademicPunctuation(trimmed);
+    if (suggested !== trimmed) setSuggestion(suggested);
+    else setSuggestion(null);
   };
 
   const generateBloomLevel = async (questionText: string, isOrQuestion = false) => {
@@ -244,14 +283,29 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
         <label className="block text-sm font-medium mb-1" style={labelStyle}>Question Text</label>
         <SpellCheckedTextarea
           value={text}
-          onChange={(v) => handleTextChange(v)}
+          onChange={(v) => {
+            handleTextChange(v);
+            checkRealTimeSuggestion(v, setMainSuggestion);
+          }}
           placeholder="Enter your question here..."
           rows={3}
           as="textarea"
           className="w-full p-2 text-sm rounded-md"
           style={inputStyle}
         />
-        <p className="text-[10px] text-gray-400 text-right mt-1">Use 'br' for Page Break</p>
+        <div className="flex items-center justify-between mt-1">
+          {mainSuggestion ? (
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md text-xs" style={{ background: '#f0f7f4', border: '1px solid #c4e5d3', color: '#2a7d5f' }}>
+              <span className="opacity-70">Suggested:</span>
+              <span className="font-semibold truncate max-w-[200px]">&ldquo;...{mainSuggestion.slice(-12)}&rdquo;</span>
+              <button type="button" onClick={() => { setText(mainSuggestion); setMainSuggestion(null); }}
+                className="font-bold underline hover:no-underline" style={{ color: '#1e6b4f' }}>Apply</button>
+              <button type="button" onClick={() => setMainSuggestion(null)}
+                className="opacity-50 hover:opacity-100" style={{ fontSize: '0.65rem' }}>✕</button>
+            </div>
+          ) : <span />}
+          <p className="text-[10px] text-gray-400">Use 'br' for Page Break</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -383,13 +437,26 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
               <h4 className="text-sm font-semibold" style={{ color: '#4b5563' }}>OR Question Details</h4>
               <SpellCheckedTextarea
                 value={orQuestionText}
-                onChange={(v) => handleOrTextChange(v)}
+                onChange={(v) => {
+                  handleOrTextChange(v);
+                  checkRealTimeSuggestion(v, setOrSuggestion);
+                }}
                 as="textarea"
                 rows={2}
                 placeholder="Alternative question text..."
                 className="w-full p-2 text-sm rounded-md"
                 style={inputStyle}
               />
+              {orSuggestion && (
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-md text-xs mt-1" style={{ background: '#f0f7f4', border: '1px solid #c4e5d3', color: '#2a7d5f' }}>
+                  <span className="opacity-70">Suggested:</span>
+                  <span className="font-semibold truncate max-w-[160px]">&ldquo;...{orSuggestion.slice(-12)}&rdquo;</span>
+                  <button type="button" onClick={() => { setOrQuestionText(orSuggestion); setOrSuggestion(null); }}
+                    className="font-bold underline hover:no-underline" style={{ color: '#1e6b4f' }}>Apply</button>
+                  <button type="button" onClick={() => setOrSuggestion(null)}
+                    className="opacity-50 hover:opacity-100" style={{ fontSize: '0.65rem' }}>✕</button>
+                </div>
+              )}
                {showBlCoPo && (
                <div className="space-y-2">
                   <div className="flex items-end gap-2 w-full">
@@ -425,11 +492,22 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
                                      if (autoCapitalize) val = val.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase());
                                      if (allCaps) val = val.toUpperCase();
                                      updateSubQuestion(idx, 'text', val);
+                                     checkRealTimeSuggestion(val, (s) => setSubSuggestion(s ? { idx, value: s } : null));
                                  }}
                                  placeholder="Sub-question text"
                                  className="w-full p-1.5 text-sm rounded-md"
                                  style={inputStyle}
                             />
+                            {subSuggestion?.idx === idx && (
+                              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] mt-0.5" style={{ background: '#f0f7f4', border: '1px solid #c4e5d3', color: '#2a7d5f' }}>
+                                <span className="opacity-70">Suggested:</span>
+                                <span className="font-semibold truncate max-w-[120px]">&ldquo;...{subSuggestion.value.slice(-10)}&rdquo;</span>
+                                <button type="button" onClick={() => { updateSubQuestion(idx, 'text', subSuggestion.value); setSubSuggestion(null); }}
+                                  className="font-bold underline" style={{ color: '#1e6b4f' }}>Apply</button>
+                                <button type="button" onClick={() => setSubSuggestion(null)}
+                                  className="opacity-50">✕</button>
+                              </div>
+                            )}
                            <div className="flex gap-2">
                                <input type="number" placeholder="Marks (Opt)" value={sub.marks || ''} onChange={(e) => updateSubQuestion(idx, 'marks', e.target.value ? parseInt(e.target.value) : undefined)} className="w-20 p-1 text-xs rounded-md" style={inputStyle} />
                                {showBlCoPo && (<>

@@ -18,19 +18,54 @@ export default function EditQuestionPaperPage() {
 
   useEffect(() => {
     async function loadPaper() {
+      // 1. Try loading normally (works for own papers)
       const record = await getPaperById(paperId);
       if (record) {
         setPaper(record);
-      } else {
-        setError('Paper not found or access denied.');
+        setLoading(false);
+        return;
       }
+
+      // 2. Fallback: try admin API (bypasses RLS for admins editing other users' papers)
+      try {
+        const res = await fetch(`/api/admin/papers/${paperId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.paper) {
+            setPaper(data.paper);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // admin API not available or not admin — fall through to error
+      }
+
+      setError('Paper not found or access denied.');
       setLoading(false);
     }
     loadPaper();
   }, [paperId]);
 
-  const handleSave = useCallback(async (data: PaperData, status: 'draft' | 'saved'): Promise<string | null> => {
-    const success = await updatePaper(paperId, data, status);
+  const handleSave = useCallback(async (
+    data: PaperData, 
+    status: 'draft' | 'saved',
+    reviewStatus?: string,
+    examCategory?: string | null,
+    submittedAt?: string | null
+  ): Promise<string | null> => {
+    // Pass the extra review fields directly to updatePaper
+    const success = await updatePaper(
+      paperId, 
+      data, 
+      status,
+      reviewStatus,
+      examCategory,
+      submittedAt,
+      // Whenever Save Final sets 'pending', clear the previous reviewer info
+      reviewStatus === 'pending' ? null : undefined,
+      reviewStatus === 'pending' ? null : undefined
+    );
     return success ? paperId : null;
   }, [paperId]);
 

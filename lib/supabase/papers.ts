@@ -20,19 +20,27 @@ function sanitizePaperData(paperData: PaperData): PaperData {
 export async function createPaper(
   ownerEmail: string,
   paperData: PaperData,
-  status: 'draft' | 'saved' = 'draft'
+  status: 'draft' | 'saved' = 'draft',
+  reviewStatus?: string,
+  examCategory?: string | null,
+  submittedAt?: string | null
 ): Promise<QuestionPaperRecord | null> {
   const clean = sanitizePaperData(paperData);
   const title = clean.header.subject || clean.header.examName || 'Untitled Paper';
   
+  const insertObj: any = {
+    title,
+    owner_email: ownerEmail,
+    status,
+    paper_data: clean,
+  };
+  if (reviewStatus !== undefined) insertObj.review_status = reviewStatus;
+  if (examCategory !== undefined) insertObj.exam_category = examCategory;
+  if (submittedAt !== undefined) insertObj.submitted_at = submittedAt;
+
   const { data, error } = await supabase()
     .from('question_papers')
-    .insert({
-      title,
-      owner_email: ownerEmail,
-      status,
-      paper_data: clean,
-    })
+    .insert(insertObj)
     .select()
     .single();
 
@@ -47,7 +55,12 @@ export async function createPaper(
 export async function updatePaper(
   paperId: string,
   paperData: PaperData,
-  status?: 'draft' | 'saved'
+  status?: 'draft' | 'saved',
+  reviewStatus?: string,
+  examCategory?: string | null,
+  submittedAt?: string | null,
+  reviewedBy?: string | null,
+  reviewedAt?: string | null
 ): Promise<boolean> {
   const clean = sanitizePaperData(paperData);
   const title = clean.header.subject || clean.header.examName || 'Untitled Paper';
@@ -57,6 +70,13 @@ export async function updatePaper(
     paper_data: clean,
   };
   if (status) updateObj.status = status;
+  if (reviewStatus !== undefined) updateObj.review_status = reviewStatus;
+  if (examCategory !== undefined) updateObj.exam_category = examCategory;
+  if (submittedAt !== undefined) updateObj.submitted_at = submittedAt;
+  
+  // Explicitly allow setting reviewedBy / reviewedAt to null to clear them
+  if (reviewedBy !== undefined) updateObj.reviewed_by = reviewedBy;
+  if (reviewedAt !== undefined) updateObj.reviewed_at = reviewedAt;
 
   const { error } = await supabase()
     .from('question_papers')
@@ -147,7 +167,14 @@ export async function getPaperById(paperId: string): Promise<QuestionPaperRecord
     .single();
 
   if (error) {
-    console.error('Error fetching paper:', error);
+    // PGRST116 = "no rows" (not found or RLS filtered) — expected, not a real error
+    const isExpected =
+      error.code === 'PGRST116' ||
+      !error.message ||
+      Object.keys(error).length === 0;
+    if (!isExpected) {
+      console.error('Error fetching paper:', error);
+    }
     return null;
   }
   return data as QuestionPaperRecord;

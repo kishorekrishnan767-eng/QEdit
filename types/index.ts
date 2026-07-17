@@ -55,14 +55,22 @@ export interface PaperData {
 }
 
 // Database record types
+export type ExamCategory = 'cycle_test_1' | 'cycle_test_2' | 'model_exam' | null;
+export type ReviewStatus = 'not_submitted' | 'pending' | 'approved' | 'rejected';
+
 export interface QuestionPaperRecord {
-    id: string;
-    title: string;
-    owner_email: string;
-    status: 'draft' | 'saved';
-    paper_data: PaperData;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  title: string;
+  owner_email: string;
+  status: 'draft' | 'saved';
+  paper_data: PaperData;
+  created_at: string;
+  updated_at: string;
+  exam_category?: ExamCategory;
+  review_status?: ReviewStatus;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  submitted_at?: string | null;
 }
 
 export interface Collaboration {

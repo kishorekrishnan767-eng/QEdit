@@ -70,10 +70,16 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
           
+          {/* Branding */}
           <div className="mt-auto pt-8 border-t" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-            <p className="text-xl font-bold tracking-wide text-[#86efac] mb-1">Livewires</p>
-            <p className="text-sm text-white opacity-70">Developed by <span className="opacity-90 font-medium text-white">Vaseem</span></p>
-            <p className="text-sm text-white opacity-70">Developed &amp; Maintained by <span className="opacity-90 font-medium text-white">Kishore Krishnan</span></p>
+            <div className="flex items-center gap-3 mb-2 ml-1">
+              <Image src="/logolive.png" alt="Livewires Logo" width={28} height={28} className="object-contain" />
+              <p className="text-xl font-bold tracking-wide text-[#86efac]">Livewires</p>
+            </div>
+            <div className="ml-11">
+              <p className="text-sm text-white opacity-70">Developed by <span className="opacity-90 font-medium text-white">Vaseem</span></p>
+              <p className="text-sm text-white opacity-70">Developed &amp; Maintained by <span className="opacity-90 font-medium text-white">Kishore Krishnan</span></p>
+            </div>
           </div>
         </div>
       </div>

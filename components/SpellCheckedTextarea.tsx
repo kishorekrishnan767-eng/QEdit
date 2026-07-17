@@ -23,6 +23,7 @@ interface Popover {
 interface SpellCheckedTextareaProps {
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   rows?: number;
   className?: string;
@@ -64,6 +65,7 @@ function buildHighlightedHTML(text: string, errors: SpellError[]): string {
 export default function SpellCheckedTextarea({
   value,
   onChange,
+  onBlur,
   placeholder,
   rows = 3,
   className = "",
@@ -223,6 +225,7 @@ export default function SpellCheckedTextarea({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onClick={handleTextareaClick}
+          onBlur={onBlur}
           placeholder={placeholder}
           rows={rows}
           disabled={disabled}
@@ -243,6 +246,7 @@ export default function SpellCheckedTextarea({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onClick={handleTextareaClick}
+          onBlur={onBlur}
           placeholder={placeholder}
           disabled={disabled}
           className={className}

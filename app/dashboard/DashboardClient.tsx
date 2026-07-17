@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FileText, Zap, LogOut, ChevronRight, Clock, Plus, Pencil, Trash2, Copy, Share2, FolderOpen, Users } from 'lucide-react';
+import { FileText, Zap, LogOut, ChevronRight, Clock, Plus, Pencil, Trash2, Copy, Share2, FolderOpen, Users, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { deletePaper, duplicatePaper, renamePaper } from '@/lib/supabase/papers';
 import { QuestionPaperRecord } from '@/types';
 import ShareModal from '@/components/ShareModal';
@@ -122,7 +122,7 @@ export default function DashboardClient({ user, drafts: initialDrafts, savedPape
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <div className="flex items-center gap-1.5 group/title">
+              <div className="flex items-center gap-1.5 group/title flex-wrap">
                 <h4
                   className="text-sm font-semibold truncate"
                   style={{ color: '#1a1a2e', cursor: list !== 'shared' ? 'text' : 'default' }}
@@ -131,6 +131,11 @@ export default function DashboardClient({ user, drafts: initialDrafts, savedPape
                 >
                   {paper.title}
                 </h4>
+                {paper.paper_data?.header?.courseCode && (
+                  <span className="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]" title="Course Code">
+                    {paper.paper_data.header.courseCode}
+                  </span>
+                )}
                 {list !== 'shared' && (
                   <button
                     onClick={(e) => { e.stopPropagation(); startRename(); }}
@@ -152,6 +157,34 @@ export default function DashboardClient({ user, drafts: initialDrafts, savedPape
               )}
               {paper.status === 'draft' && list !== 'shared' && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: '#fff8e1', color: '#d97706' }}>Draft</span>
+              )}
+              {/* Review status badges — only for saved papers (non-drafts, non-shared) */}
+              {list !== 'shared' && paper.status === 'saved' && paper.review_status === 'approved' && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold"
+                  style={{ background: '#e8f5ee', color: '#2a7d5f', border: '1px solid #c4e5d3' }}
+                  title={paper.reviewed_by ? `Reviewed by ${paper.reviewed_by}` : 'Approved by SysOps'}
+                >
+                  <CheckCircle2 size={10} /> Approved
+                </span>
+              )}
+              {list !== 'shared' && paper.status === 'saved' && paper.review_status === 'pending' && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold"
+                  style={{ background: '#fff8e1', color: '#d97706', border: '1px solid #fde68a' }}
+                  title="Submitted for SysOps review"
+                >
+                  <Clock size={10} /> Under Review
+                </span>
+              )}
+              {list !== 'shared' && paper.status === 'saved' && paper.review_status === 'rejected' && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold"
+                  style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
+                  title={paper.reviewed_by ? `Reviewed by ${paper.reviewed_by}` : 'Revisions required'}
+                >
+                  <XCircle size={10} /> Revisions Needed
+                </span>
               )}
             </div>
           </div>
@@ -221,8 +254,14 @@ export default function DashboardClient({ user, drafts: initialDrafts, savedPape
       {/* Header */}
       <header className="sticky top-0 z-20 backdrop-blur-lg" style={{ background: 'rgba(255,255,255,0.85)', borderBottom: '1px solid #e2e5ea' }}>
         <div className="max-w-5xl mx-auto px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Qedit" width={120} height={32} className="h-8 w-auto" priority />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Image src="/logo.png" alt="Qedit" width={120} height={32} className="h-8 w-auto" priority />
+            </div>
+            <div className="h-6 w-px bg-[#2a7d5f] opacity-20 hidden sm:block"></div>
+            <div className="hidden sm:flex items-center opacity-90">
+              <Image src="/blacklive.png" alt="Livewires" width={140} height={40} className="h-6 sm:h-7 w-auto object-contain" priority />
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">

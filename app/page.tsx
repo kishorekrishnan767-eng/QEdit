@@ -131,13 +131,18 @@ export default function LandingPage() {
         } : {}}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between py-5">
-          <div className="flex items-center gap-3">
-            <Image src="/logohead.png" alt="QEdit" width={48} height={48} className="w-11 h-auto object-contain" priority />
-            <span className="text-2xl font-extrabold tracking-tighter" style={{ color: '#1a3d2b' }}>QEdit</span>
+          {/* Left side — QEdit logo */}
+          <div className="flex items-center gap-3.5">
+            <Image src="/logohead.png" alt="QEdit" width={60} height={60} className="w-12 sm:w-14 h-auto object-contain" priority />
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tighter" style={{ color: '#1a3d2b' }}>QEdit</span>
           </div>
-          {/* Right side — nav links + auth */}
-          <div className="flex items-center gap-7">
-            <Link href="/auth" className="px-7 py-3 rounded-full text-lg font-bold text-white bg-[#2a7d5f] hover:bg-[#1f5e47] transition-colors">Get Started &rarr;</Link>
+
+          {/* Right side — Livewires logo + Get Started */}
+          <div className="flex items-center gap-5 sm:gap-8">
+            <div className="hidden sm:flex items-center opacity-90 hover:opacity-100 transition-opacity">
+              <Image src="/blacklive.png" alt="Livewires" width={260} height={80} className="h-12 sm:h-14 w-auto object-contain" priority />
+            </div>
+            <Link href="/auth" className="px-5 py-2.5 rounded-full text-base font-bold text-white bg-[#2a7d5f] hover:bg-[#1f5e47] transition-colors whitespace-nowrap">Get Started &rarr;</Link>
           </div>
         </div>
       </nav>

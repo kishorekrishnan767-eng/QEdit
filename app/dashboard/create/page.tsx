@@ -12,18 +12,40 @@ export default function CreateQuestionPaperPage() {
   const router = useRouter();
   const [paperId, setPaperId] = useState<string | null>(null);
 
-  const handleSave = useCallback(async (data: PaperData, status: 'draft' | 'saved'): Promise<string | null> => {
+  const handleSave = useCallback(async (
+    data: PaperData, 
+    status: 'draft' | 'saved',
+    reviewStatus?: string,
+    examCategory?: string | null,
+    submittedAt?: string | null
+  ): Promise<string | null> => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) return null;
 
     if (paperId) {
       // Update existing paper
-      const success = await updatePaper(paperId, data, status);
+      const success = await updatePaper(
+        paperId, 
+        data, 
+        status,
+        reviewStatus,
+        examCategory,
+        submittedAt,
+        reviewStatus === 'pending' ? null : undefined,
+        reviewStatus === 'pending' ? null : undefined
+      );
       return success ? paperId : null;
     } else {
       // Create new paper
-      const record = await createPaper(user.email, data, status);
+      const record = await createPaper(
+        user.email, 
+        data, 
+        status,
+        reviewStatus,
+        examCategory,
+        submittedAt
+      );
       if (record) {
         setPaperId(record.id);
         return record.id;
