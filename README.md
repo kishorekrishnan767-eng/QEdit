@@ -15,10 +15,13 @@
 *   **Dynamic Auto-Pagination**: Programmatic layout measurement that splits sections, questions, and alternatives cleanly across page borders without cut-offs or orphans.
 *   **Comprehensive Paper Structure**: Supports multiple parts (Part A, B, C), marks allocation, question types (Short, Long, MCQs), sub-questions (i, ii, iii), and OR-choices (alternative questions).
 *   **BL / CO / PO Annotations**: Tag Bloom's Level (BL), Course Outcome (CO), and Program Outcome (PO) mapping per question.
+*   **Real-Time Spell Checker & Grammar Fixes**: Integrated dictionary-based spell checker that highlights misspellings with interactive suggestions and automatically logs grammar corrections.
+*   **Automated Punctuation Engine**: Smartly auto-formats question texts to enforce consistent academic punctuation across the paper.
 *   **Dual-Layout PDF Export**:
     *   *Standard Layout*: Clean portrait A4 pages for Model/Semester Exams.
     *   *Booklet Layout*: Auto-detects Cycle/Cyclic tests to output two-column side-by-side landscape pages (2-up layout) to save paper.
 *   **Admin-Gated Authentication**: Custom authorization layer on top of Supabase Auth (Google OAuth & Email/Password). Users registering are flagged as `pending` until approved by the system admin.
+*   **Exam Review Workflows**: Extended admin dashboard featuring paper status management and formal review states.
 *   **Real-time Collaboration**: Securely share papers with colleagues with granular permissions (`view` or `edit`).
 *   **Access Request Workflows**: Request access to locked papers, generating real-time email notifications for approval/rejection via Nodemailer (SMTP).
 *   **Cloud Auto-Save**: Seamlessly saves draft progress automatically with a 5-second debounce.

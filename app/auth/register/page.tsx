@@ -48,55 +48,88 @@ export default function RegisterPage() {
 
     setLoading(true);
     const supabase = createClient();
-
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.toLowerCase().trim(),
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
-
-    if (signUpError) {
-      if (
-        signUpError.message.toLowerCase().includes('already registered') ||
-        signUpError.message.toLowerCase().includes('already been registered')
-      ) {
-        setError('An account with this email already exists. Please sign in instead.');
-      } else {
-        setError(signUpError.message);
-      }
-      setLoading(false);
-      return;
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.toLowerCase().trim(),
-      password,
-    });
-
-    if (signInError) {
-      router.push('/auth?registered=1');
-      return;
-    }
+    const cleanEmail = email.toLowerCase().trim();
 
     try {
-      const res = await fetch('/api/auth/check-access', {
+      // 1. Check access status FIRST
+      const accessRes = await fetch('/api/auth/check-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase().trim() }),
+        body: JSON.stringify({ email: cleanEmail }),
       });
-      const data = await res.json();
+      const accessData = await accessRes.json();
 
-      if (!res.ok) {
-        setError(data.error || 'Failed to process authorization. Has the database been setup?');
+      if (!accessRes.ok) {
+        setError(accessData.error || 'Failed to process authorization.');
         setLoading(false);
         return;
       }
 
-      if (data.access === 'admin' || data.access === 'approved') router.push('/dashboard');
-      else router.push('/auth/pending');
-      router.refresh();
+      if (accessData.access === 'admin' || accessData.access === 'approved') {
+        // --- PRE-APPROVED FLOW ---
+        // Uses Admin API to bypass rate limits and email confirmation
+        const regRes = await fetch('/api/auth/register-approved', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail, password })
+        });
+        
+        const regData = await regRes.json();
+        if (!regRes.ok) {
+          setError(regData.error || 'Failed to create pre-approved account.');
+          setLoading(false);
+          return;
+        }
+
+        // Immediately sign them in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+
+        if (signInError) {
+          setError(signInError.message);
+          setLoading(false);
+          return;
+        }
+
+        router.push('/dashboard');
+        router.refresh();
+
+      } else {
+        // --- NEW/PENDING USER FLOW ---
+        // Uses standard signUp so they get a confirmation email (will hit rate limit eventually if not using SMTP)
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        });
+
+        if (signUpError) {
+          if (
+            signUpError.message.toLowerCase().includes('already registered') ||
+            signUpError.message.toLowerCase().includes('already been registered')
+          ) {
+            setError('An account with this email already exists. Please sign in instead.');
+          } else {
+            setError(signUpError.message);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Try to sign in. If they have "Confirm Email" ON in Supabase, this will error 
+        // with "Email not confirmed", which is fine, we still send them to the pending page.
+        await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+
+        router.push('/auth/pending');
+        router.refresh();
+      }
     } catch {
-      setError('Network error preventing access check.');
+      setError('Network error preventing registration.');
       setLoading(false);
     }
   };
