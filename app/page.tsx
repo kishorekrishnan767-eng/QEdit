@@ -420,23 +420,23 @@ export default function LandingPage() {
                 </p>
                 
                 <div className="space-y-5">
-                  <a href="mailto:support@qedit.com" className="group flex items-center p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] hover:border-[#2a7d5f]/40 transition-all duration-300">
+                  <a href="mailto:chanthip@srmist.edu.in" className="group flex items-center p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] hover:border-[#2a7d5f]/40 transition-all duration-300">
                     <div className="w-14 h-14 rounded-full bg-[#2a7d5f]/20 flex items-center justify-center mr-5 group-hover:scale-110 transition-transform duration-300">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                     </div>
                     <div>
                       <div className="text-xs font-bold text-[#c4e5d3]/60 uppercase tracking-wider mb-1">Direct Email</div>
-                      <div className="text-lg font-bold text-white group-hover:text-[#4ade80] transition-colors">support@qedit.com</div>
+                      <div className="text-lg font-bold text-white group-hover:text-[#4ade80] transition-colors">chanthip@srmist.edu.in</div>
                     </div>
                   </a>
                   
-                  <a href="tel:+918608252352" className="group flex items-center p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] hover:border-[#2a7d5f]/40 transition-all duration-300">
+                  <a href="tel:+919551473145" className="group flex items-center p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] hover:border-[#2a7d5f]/40 transition-all duration-300">
                     <div className="w-14 h-14 rounded-full bg-[#2a7d5f]/20 flex items-center justify-center mr-5 group-hover:scale-110 transition-transform duration-300">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     </div>
                     <div>
                       <div className="text-xs font-bold text-[#c4e5d3]/60 uppercase tracking-wider mb-1">priority line</div>
-                      <div className="text-lg font-bold text-white group-hover:text-[#4ade80] transition-colors">+91 86082 52352</div>
+                      <div className="text-lg font-bold text-white group-hover:text-[#4ade80] transition-colors">+91 95514 73145</div>
                     </div>
                   </a>
                 </div>
@@ -530,37 +530,36 @@ export default function LandingPage() {
                   An intelligent question paper management platform built for modern educational institutions.
                 </p>
                 <div className="flex flex-col gap-2 text-sm">
-                  <a href="tel:+918608252352" className="flex items-center gap-2 text-gray-300 hover:text-emerald-400 transition-colors font-medium">
+                  <a href="tel:+919551473145" className="flex items-center gap-2 text-gray-300 hover:text-emerald-400 transition-colors font-medium">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.09 6.09l.98-.89a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    +91 86082 52352
+                    +91 95514 73145
                   </a>
-                  <a href="mailto:mh6651@srmist.edu.in" className="flex items-center gap-2 text-gray-300 hover:text-emerald-400 transition-colors font-medium">
+                  <a href="mailto:chanthip@srmist.edu.in" className="flex items-center gap-2 text-gray-300 hover:text-emerald-400 transition-colors font-medium">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                    mh6651@srmist.edu.in
+                    chanthip@srmist.edu.in
                   </a>
                 </div>
              </div>
 
              {/* Platform Links */}
-             <div>
+              <div>
                 <h4 className="text-white font-bold text-sm mb-4 tracking-wide uppercase">Platform</h4>
                 <ul className="space-y-3 text-gray-400 text-sm font-medium">
                   <li><Link href="/auth" className="hover:text-emerald-400 transition-colors">Sign In</Link></li>
                   <li><Link href="/auth/register" className="hover:text-emerald-400 transition-colors">Apply for Access</Link></li>
                   <li><Link href="/auth/forgot-password" className="hover:text-emerald-400 transition-colors">Reset Password</Link></li>
-                  <li><Link href="/admin" className="hover:text-red-400 transition-colors">Sys-Ops Panel</Link></li>
                 </ul>
-             </div>
+              </div>
 
-             {/* Legal/Info Links */}
-             <div>
+              {/* Legal/Info Links */}
+              <div>
                 <h4 className="text-white font-bold text-sm mb-4 tracking-wide uppercase">Information</h4>
                 <ul className="space-y-3 text-gray-400 text-sm font-medium">
-                  <li><Link href="#" className="hover:text-emerald-400 transition-colors">Documentation</Link></li>
+                  <li><Link href="/docs" className="hover:text-emerald-400 transition-colors">Documentation</Link></li>
                   <li><Link href="#" className="hover:text-emerald-400 transition-colors">Privacy Policy</Link></li>
                   <li><Link href="#" className="hover:text-emerald-400 transition-colors">Terms of Service</Link></li>
                 </ul>
-             </div>
+              </div>
            </div>
 
            <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
