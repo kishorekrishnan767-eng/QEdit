@@ -1,6 +1,13 @@
+export type ContentBlock = 
+  | { type: 'text'; content: string }
+  | { type: 'equation'; latex: string; displayMode: boolean }
+  | { type: 'diagram'; dataUrl: string; position: 'left' | 'center' | 'right' }
+  | { type: 'table'; rows: string[][] };
+
 export interface Question {
     id: string;
-    text: string;
+    text: string;           // Legacy text (kept for backward compatibility)
+    blocks?: ContentBlock[]; // New block-based structure
     marks: number;
     type: 'short' | 'long' | 'mcq' | 'break'; // Added 'break' for manual page breaks
     options?: string[]; // For MCQs
@@ -10,9 +17,9 @@ export interface Question {
     po?: string; // Program Outcome
     orQuestion?: Question; // For either/or choice
     subQuestions?: Question[]; // For i, ii, iii parts
-    diagram?: string;       // base64 PNG from MathCanvas
-    diagramPosition?: 'left' | 'center' | 'right'; // Optional positioning for diagram
-    mathEquation?: string;  // unicode math equation string
+    diagram?: string;       // Legacy base64 PNG from MathCanvas
+    diagramPosition?: 'left' | 'center' | 'right'; // Legacy Optional positioning for diagram
+    mathEquation?: string;  // Legacy unicode math equation string
 }
 
 

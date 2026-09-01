@@ -9,6 +9,7 @@
 
 import { useState, useRef } from "react";
 import { Check, X, Trash2 } from "lucide-react";
+import katex from "katex";
 
 interface MathEquationInputProps {
   initialValue?: string;
@@ -21,75 +22,63 @@ const SYMBOL_GROUPS = [
   {
     label: "Greek Letters",
     symbols: [
-      { label: "α", value: "α" }, { label: "β", value: "β" }, { label: "γ", value: "γ" },
-      { label: "δ", value: "δ" }, { label: "θ", value: "θ" }, { label: "λ", value: "λ" },
-      { label: "μ", value: "μ" }, { label: "π", value: "π" }, { label: "σ", value: "σ" },
-      { label: "φ", value: "φ" }, { label: "ω", value: "ω" }, { label: "Δ", value: "Δ" },
-      { label: "Σ", value: "Σ" }, { label: "Π", value: "Π" }, { label: "Ω", value: "Ω" },
-      { label: "Γ", value: "Γ" }, { label: "Λ", value: "Λ" }, { label: "Θ", value: "Θ" },
+      { label: "α", value: "\\alpha" }, { label: "β", value: "\\beta" }, { label: "γ", value: "\\gamma" },
+      { label: "δ", value: "\\delta" }, { label: "θ", value: "\\theta" }, { label: "λ", value: "\\lambda" },
+      { label: "μ", value: "\\mu" }, { label: "π", value: "\\pi" }, { label: "σ", value: "\\sigma" },
+      { label: "φ", value: "\\phi" }, { label: "ω", value: "\\omega" }, { label: "Δ", value: "\\Delta" },
+      { label: "Σ", value: "\\Sigma" }, { label: "Π", value: "\\Pi" }, { label: "Ω", value: "\\Omega" },
+      { label: "Γ", value: "\\Gamma" }, { label: "Λ", value: "\\Lambda" }, { label: "Θ", value: "\\Theta" },
     ],
   },
   {
     label: "Operators",
     symbols: [
-      { label: "±", value: "±" }, { label: "∓", value: "∓" }, { label: "×", value: "×" },
-      { label: "÷", value: "÷" }, { label: "=", value: "=" }, { label: "≠", value: "≠" },
-      { label: "≈", value: "≈" }, { label: "≡", value: "≡" }, { label: "≤", value: "≤" },
-      { label: "≥", value: "≥" }, { label: "<", value: "<" }, { label: ">", value: ">" },
-      { label: "∝", value: "∝" }, { label: "∞", value: "∞" }, { label: "√", value: "√(" },
-      { label: "∛", value: "∛(" }, { label: "!", value: "!" }, { label: "%", value: "%" },
+      { label: "±", value: "\\pm" }, { label: "∓", value: "\\mp" }, { label: "×", value: "\\times" },
+      { label: "÷", value: "\\div" }, { label: "=", value: "=" }, { label: "≠", value: "\\neq" },
+      { label: "≈", value: "\\approx" }, { label: "≡", value: "\\equiv" }, { label: "≤", value: "\\leq" },
+      { label: "≥", value: "\\geq" }, { label: "<", value: "<" }, { label: ">", value: ">" },
+      { label: "∝", value: "\\propto" }, { label: "∞", value: "\\infty" }, { label: "√", value: "\\sqrt{}" },
+      { label: "∛", value: "\\sqrt[3]{}" }, { label: "!", value: "!" }, { label: "...", value: "\\dots" },
     ],
   },
   {
     label: "Calculus",
     symbols: [
-      { label: "∫", value: "∫" }, { label: "∬", value: "∬" }, { label: "∮", value: "∮" },
-      { label: "∂", value: "∂" }, { label: "∇", value: "∇" }, { label: "d/dx", value: "d/dx" },
-      { label: "dy/dx", value: "dy/dx" }, { label: "d²y/dx²", value: "d²y/dx²" },
-      { label: "lim", value: "lim" }, { label: "→", value: "→" }, { label: "∑", value: "∑" },
-      { label: "∏", value: "∏" }, { label: "∆x", value: "∆x" }, { label: "∆y", value: "∆y" },
+      { label: "∫", value: "\\int" }, { label: "∬", value: "\\iint" }, { label: "∮", value: "\\oint" },
+      { label: "∂", value: "\\partial" }, { label: "∇", value: "\\nabla" }, { label: "d/dx", value: "\\frac{d}{dx}" },
+      { label: "dy/dx", value: "\\frac{dy}{dx}" }, { label: "d²y/dx²", value: "\\frac{d^2y}{dx^2}" },
+      { label: "lim", value: "\\lim_{x\\to\\infty}" }, { label: "→", value: "\\to" }, { label: "∑", value: "\\sum_{i=1}^{n}" },
+      { label: "∏", value: "\\prod_{i=1}^{n}" }, { label: "∆x", value: "\\Delta x" }, { label: "∆y", value: "\\Delta y" },
     ],
   },
   {
     label: "Sets & Logic",
     symbols: [
-      { label: "∈", value: "∈" }, { label: "∉", value: "∉" }, { label: "∩", value: "∩" },
-      { label: "∪", value: "∪" }, { label: "⊂", value: "⊂" }, { label: "⊃", value: "⊃" },
-      { label: "⊆", value: "⊆" }, { label: "⊇", value: "⊇" }, { label: "∅", value: "∅" },
-      { label: "∀", value: "∀" }, { label: "∃", value: "∃" }, { label: "¬", value: "¬" },
-      { label: "∧", value: "∧" }, { label: "∨", value: "∨" }, { label: "⊕", value: "⊕" },
+      { label: "∈", value: "\\in" }, { label: "∉", value: "\\notin" }, { label: "∩", value: "\\cap" },
+      { label: "∪", value: "\\cup" }, { label: "⊂", value: "\\subset" }, { label: "⊃", value: "\\supset" },
+      { label: "⊆", value: "\\subseteq" }, { label: "⊇", value: "\\supseteq" }, { label: "∅", value: "\\emptyset" },
+      { label: "∀", value: "\\forall" }, { label: "∃", value: "\\exists" }, { label: "¬", value: "\\neg" },
+      { label: "∧", value: "\\wedge" }, { label: "∨", value: "\\vee" }, { label: "⊕", value: "\\oplus" },
     ],
   },
   {
-    label: "Geometry",
+    label: "Structures",
     symbols: [
-      { label: "∠", value: "∠" }, { label: "∟", value: "∟" }, { label: "⊥", value: "⊥" },
-      { label: "∥", value: "∥" }, { label: "≅", value: "≅" }, { label: "~", value: "~" },
-      { label: "△", value: "△" }, { label: "□", value: "□" }, { label: "○", value: "○" },
-      { label: "°", value: "°" }, { label: "′", value: "′" }, { label: "″", value: "″" },
-      { label: "π", value: "π" }, { label: "r²", value: "r²" }, { label: "½", value: "½" },
+      { label: "x²", value: "x^2" }, { label: "xⁿ", value: "x^n" }, { label: "x₁", value: "x_1" },
+      { label: "xₙ", value: "x_n" }, { label: "frac", value: "\\frac{a}{b}" }, { label: "binom", value: "\\binom{n}{x}" },
+      { label: "Matrix 2x2", value: "\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}" },
+      { label: "Cases", value: "\\begin{cases} x^2, & x\\geq0 \\\\ -x^2, & x<0 \\end{cases}" },
+      { label: "Aligned", value: "\\begin{aligned} y &= x^2+2x+1 \\\\ &= (x+1)^2 \\end{aligned}" },
     ],
   },
   {
-    label: "Powers & Subscripts",
+    label: "Statistics",
     symbols: [
-      { label: "x²", value: "x²" }, { label: "x³", value: "x³" }, { label: "xⁿ", value: "xⁿ" },
-      { label: "x₁", value: "x₁" }, { label: "x₂", value: "x₂" }, { label: "xₙ", value: "xₙ" },
-      { label: "aₙ", value: "aₙ" }, { label: "bₙ", value: "bₙ" }, { label: "²", value: "²" },
-      { label: "³", value: "³" }, { label: "⁴", value: "⁴" }, { label: "⁻¹", value: "⁻¹" },
-      { label: "₀", value: "₀" }, { label: "₁", value: "₁" }, { label: "₂", value: "₂" },
-      { label: "√x", value: "√x" }, { label: "ⁿ√x", value: "ⁿ√x" }, { label: "log", value: "log" },
-    ],
-  },
-  {
-    label: "Fractions & Templates",
-    symbols: [
-      { label: "½", value: "½" }, { label: "⅓", value: "⅓" }, { label: "¼", value: "¼" },
-      { label: "¾", value: "¾" }, { label: "⅔", value: "⅔" }, { label: "a/b", value: "a/b" },
-      { label: "(a+b)/c", value: "(a+b)/c" }, { label: "sin θ", value: "sin θ" },
-      { label: "cos θ", value: "cos θ" }, { label: "tan θ", value: "tan θ" },
-      { label: "sin⁻¹", value: "sin⁻¹" }, { label: "cos⁻¹", value: "cos⁻¹" },
-      { label: "tan⁻¹", value: "tan⁻¹" }, { label: "eˣ", value: "eˣ" }, { label: "ln x", value: "ln x" },
+      { label: "X̄", value: "\\bar{x}" }, { label: "s²", value: "s^2" }, { label: "σ²", value: "\\sigma^2" },
+      { label: "E(X)", value: "E(X)" }, { label: "Var(X)", value: "Var(X)" }, { label: "Cov", value: "Cov(X,Y)" },
+      { label: "P(A|B)", value: "P(A\\mid B)" }, { label: "Binomial", value: "P(X=x)=\\binom{n}{x}p^x(1-p)^{n-x}" },
+      { label: "Poisson", value: "P(X=x)=\\frac{e^{-\\lambda}\\lambda^x}{x!}" },
+      { label: "Normal", value: "f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}" }
     ],
   },
 ];
@@ -145,7 +134,7 @@ export default function MathEquationInput({ initialValue = "", onInsert, onClose
                 ref={textareaRef}
                 value={equation}
                 onChange={e => setEquation(e.target.value)}
-                placeholder="e.g.  x² + y² = r²   or   ∫₀^∞ e^(-x²) dx = √π/2"
+                placeholder="e.g. \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} or \sum_{i=1}^n x_i"
                 rows={3}
                 className="w-full p-2 rounded text-sm font-mono resize-none"
                 style={{ background: "#1e293b", color: "#e2e8f0", border: "1px solid #334155", outline: "none" }}
@@ -165,9 +154,19 @@ export default function MathEquationInput({ initialValue = "", onInsert, onClose
           {equation.trim() && (
             <div className="px-3 py-2 rounded" style={{ background: "#1e293b", border: "1px solid #334155" }}>
               <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
-              <div className="text-white text-base font-serif tracking-wide" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                {equation}
-              </div>
+              <div 
+                className="text-white text-base font-serif tracking-wide" 
+                style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                dangerouslySetInnerHTML={{ 
+                  __html: (function() {
+                    try {
+                      return katex.renderToString(equation, { displayMode: true, throwOnError: false });
+                    } catch (e) {
+                      return equation;
+                    }
+                  })()
+                }}
+              />
             </div>
           )}
         </div>

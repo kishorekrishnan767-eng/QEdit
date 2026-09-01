@@ -3,6 +3,7 @@ import { DM_Sans } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",

@@ -1,5 +1,26 @@
 import { PaperData, Question, Section } from "@/types";
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import katex from "katex";
+
+const renderMathText = (text: string) => {
+  if (!text) return null;
+  let html = text.replace(/\$\$(.*?)\$\$/gs, (match, math) => {
+    try {
+      return katex.renderToString(math, { displayMode: true, throwOnError: false });
+    } catch (e) {
+      return match;
+    }
+  });
+  html = html.replace(/\$(.*?)\$/gs, (match, math) => {
+    try {
+      return katex.renderToString(math, { displayMode: false, throwOnError: false });
+    } catch (e) {
+      return match;
+    }
+  });
+  html = html.replace(/\n/g, '<br/>');
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
 
 interface PreviewProps {
   data: PaperData;
@@ -119,7 +140,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                   <div className="text-justify flex-1" style={{ paddingRight: '1em' }}>
                     <p>
                       {question.orQuestion && <span className="mr-2">A.</span>}
-                      {question.text}
+                      {renderMathText(question.text)}
                     </p>
                   </div>
                   {showBlCoPo && (
@@ -137,7 +158,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                         <div className="flex flex-1 text-justify" style={{ gap: '0.5em', paddingRight: '1em' }}>
                           <span className="text-right shrink-0" style={{ width: '1.5em' }}>{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
                           <div className="flex-1 flex justify-between">
-                            <span>{sub.text}</span>
+                            <span>{renderMathText(sub.text)}</span>
                             <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
                               {sub.marks ? `[${sub.marks}]` : ''}
                             </span>
@@ -160,7 +181,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                     <div className="flex justify-between items-baseline text-left font-normal">
                       <p className="text-justify flex-1" style={{ paddingRight: '1em' }}>
                         <span className="mr-2">B.</span>
-                        {question.orQuestion.text}
+                        {renderMathText(question.orQuestion.text)}
                       </p>
                       {showBlCoPo && (
                         <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
@@ -177,7 +198,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                             <div className="flex flex-1 text-justify" style={{ gap: '0.5em', paddingRight: '1em' }}>
                               <span className="text-right shrink-0" style={{ width: '1.5em' }}>{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
                               <div className="flex-1 flex justify-between">
-                                <span>{sub.text}</span>
+                                <span>{renderMathText(sub.text)}</span>
                                 <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
                                   {sub.marks ? `[${sub.marks}]` : ''}
                                 </span>
@@ -199,7 +220,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                 {/* Math Equation */}
                 {question.mathEquation && (
                   <div style={{ marginTop: '0.35em', marginBottom: '0.2em', fontFamily: '"Times New Roman", Times, serif', fontSize: '1em', whiteSpace: 'pre-wrap', textAlign: 'left' }}>
-                    {question.mathEquation}
+                    {renderMathText(question.mathEquation)}
                   </div>
                 )}
                 {/* Diagram */}
