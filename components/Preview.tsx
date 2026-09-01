@@ -4,14 +4,14 @@ import katex from "katex";
 
 const renderMathText = (text: string) => {
   if (!text) return null;
-  let html = text.replace(/\$\$(.*?)\$\$/gs, (match, math) => {
+  let html = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
     try {
       return katex.renderToString(math, { displayMode: true, throwOnError: false });
     } catch (e) {
       return match;
     }
   });
-  html = html.replace(/\$(.*?)\$/gs, (match, math) => {
+  html = html.replace(/\$([\s\S]*?)\$/g, (match, math) => {
     try {
       return katex.renderToString(math, { displayMode: false, throwOnError: false });
     } catch (e) {
