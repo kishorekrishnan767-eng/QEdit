@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Sparkles, Loader2, Pencil, FunctionSquare, X as XIcon } from "lucide-react";
 import { Question } from "@/types";
 import SpellCheckedTextarea from "./SpellCheckedTextarea";
 import { applyAcademicPunctuation } from "@/lib/utils/questionPunctuation";
+import dynamic from "next/dynamic";
+
+const MathCanvas        = dynamic(() => import("./MathCanvas"),        { ssr: false });
+const MathEquationInput = dynamic(() => import("./MathEquationInput"), { ssr: false });
 
 interface QuestionFormProps {
   onAddQuestion: (question: Question) => void;
@@ -43,6 +47,17 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
   const [hasSubQuestions, setHasSubQuestions] = useState(false);
   const [subQuestions, setSubQuestions] = useState<Question[]>([]);
 
+  const [hasOrSubQuestions, setHasOrSubQuestions] = useState(false);
+  const [orSubQuestions, setOrSubQuestions] = useState<Question[]>([]);
+  const [orSubSuggestion, setOrSubSuggestion] = useState<{ idx: number; value: string } | null>(null);
+
+  // Math tools state
+  const [diagram, setDiagram]             = useState<string | undefined>(undefined);
+  const [mathEquation, setMathEquation]   = useState<string | undefined>(undefined);
+  const [showCanvas, setShowCanvas]       = useState(false);
+  const [showEquation, setShowEquation]   = useState(false);
+
+
   useEffect(() => {
       if (sectionDefaultMarks) {
           setMarks(sectionDefaultMarks);
@@ -65,9 +80,18 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
           setOrQuestionBl(editingQuestion.orQuestion.bl || "1");
           setOrQuestionCo(editingQuestion.orQuestion.co || "1");
           setOrQuestionPo(editingQuestion.orQuestion.po || "1");
+          if (editingQuestion.orQuestion.subQuestions && editingQuestion.orQuestion.subQuestions.length > 0) {
+              setHasOrSubQuestions(true);
+              setOrSubQuestions(editingQuestion.orQuestion.subQuestions);
+          } else {
+              setHasOrSubQuestions(false);
+              setOrSubQuestions([]);
+          }
       } else {
           setHasOrQuestion(false);
           setOrQuestionText("");
+          setHasOrSubQuestions(false);
+          setOrSubQuestions([]);
       }
 
       if (editingQuestion.subQuestions && editingQuestion.subQuestions.length > 0) {
@@ -77,6 +101,9 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
           setHasSubQuestions(false);
           setSubQuestions([]);
       }
+
+      setDiagram(editingQuestion.diagram);
+      setMathEquation(editingQuestion.mathEquation);
 
     } else {
       setText("");
@@ -90,6 +117,10 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       setOrQuestionText("");
       setHasSubQuestions(false);
       setSubQuestions([]);
+      setHasOrSubQuestions(false);
+      setOrSubQuestions([]);
+      setDiagram(undefined);
+      setMathEquation(undefined);
     }
   }, [editingQuestion, sectionDefaultMarks]);
 
@@ -101,15 +132,23 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     const correctedText = capitalizeFirstLetter(applyAcademicPunctuation(text));
 
     let orQuestionObj: Question | undefined = undefined;
-    if (hasOrQuestion && orQuestionText.trim()) {
+    if (hasOrQuestion && (orQuestionText.trim() || (hasOrSubQuestions && orSubQuestions.length > 0))) {
+        const correctedOrSubs = hasOrSubQuestions
+          ? orSubQuestions.map(sub => ({
+              ...sub,
+              text: sub.text.trim() ? capitalizeFirstLetter(applyAcademicPunctuation(sub.text)) : sub.text,
+            }))
+          : undefined;
+
         orQuestionObj = {
-            id: crypto.randomUUID(),
-            text: capitalizeFirstLetter(applyAcademicPunctuation(orQuestionText)),
+            id: editingQuestion?.orQuestion?.id || crypto.randomUUID(),
+            text: orQuestionText.trim() ? capitalizeFirstLetter(applyAcademicPunctuation(orQuestionText)) : "",
             marks: marks,
             type: type,
             bl: orQuestionBl,
             co: orQuestionCo,
-            po: orQuestionPo
+            po: orQuestionPo,
+            subQuestions: correctedOrSubs
         };
     }
 
@@ -130,7 +169,9 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       co,
       po,
       orQuestion: orQuestionObj,
-      subQuestions: correctedSubs
+      subQuestions: correctedSubs,
+      diagram:      diagram || undefined,
+      mathEquation: mathEquation?.trim() || undefined,
     };
 
     onAddQuestion(newQuestion);
@@ -145,9 +186,14 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
         setOrQuestionText("");
         setHasSubQuestions(false);
         setSubQuestions([]);
+        setHasOrSubQuestions(false);
+        setOrSubQuestions([]);
+        setDiagram(undefined);
+        setMathEquation(undefined);
         setMainSuggestion(null);
         setOrSuggestion(null);
         setSubSuggestion(null);
+        setOrSubSuggestion(null);
     }
   };
 
@@ -270,6 +316,29 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       const newSubs = subQuestions.filter((_, i) => i !== index);
       setSubQuestions(newSubs);
       if (newSubs.length === 0) setHasSubQuestions(false);
+  };
+
+  const addOrSubQuestion = () => {
+      setOrSubQuestions([...orSubQuestions, {
+          id: crypto.randomUUID(),
+          text: "",
+          marks: 0,
+          type: 'short',
+          bl: '1', co: '1', po: '1'
+      }]);
+      setHasOrSubQuestions(true);
+  };
+
+  const updateOrSubQuestion = (index: number, field: keyof Question, value: any) => {
+      const newSubs = [...orSubQuestions];
+      newSubs[index] = { ...newSubs[index], [field]: value };
+      setOrSubQuestions(newSubs);
+  };
+
+  const removeOrSubQuestion = (index: number) => {
+      const newSubs = orSubQuestions.filter((_, i) => i !== index);
+      setOrSubQuestions(newSubs);
+      if (newSubs.length === 0) setHasOrSubQuestions(false);
   };
 
   const inputStyle = { border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' };
@@ -417,7 +486,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       )}
 
       {/* Advanced Features Toggles */}
-      <div className="flex gap-4 pt-3" style={{ borderTop: '1px solid #e2e5ea' }}>
+      <div className="flex flex-wrap gap-3 pt-3" style={{ borderTop: '1px solid #e2e5ea' }}>
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: '#4b5563' }}>
               <input type="checkbox" checked={hasOrQuestion} onChange={(e) => setHasOrQuestion(e.target.checked)} className="rounded" style={{ accentColor: '#2a7d5f' }} />
               Add OR Question
@@ -429,7 +498,88 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
               }} className="rounded" style={{ accentColor: '#2a7d5f' }} />
               Add Sub-questions
           </label>
+
+          {/* Math tools */}
+          <button
+            type="button"
+            onClick={() => setShowCanvas(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all"
+            style={{
+              background: diagram ? '#e0f2ec' : '#f1f3f6',
+              color:      diagram ? '#1e6b4f' : '#4b5563',
+              border:     diagram ? '1px solid #a7e0c7' : '1px solid #e2e5ea',
+            }}
+          >
+            <Pencil size={13} />
+            {diagram ? '✓ Diagram' : '📐 Draw Diagram'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowEquation(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all"
+            style={{
+              background: mathEquation ? '#e0f2ec' : '#f1f3f6',
+              color:      mathEquation ? '#1e6b4f' : '#4b5563',
+              border:     mathEquation ? '1px solid #a7e0c7' : '1px solid #e2e5ea',
+            }}
+          >
+            <FunctionSquare size={13} />
+            {mathEquation ? '✓ Equation' : '∑ Math Equation'}
+          </button>
       </div>
+
+      {/* Diagram preview */}
+      {diagram && (
+        <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid #d1d5db' }}>
+          <img src={diagram} alt="Math diagram" className="w-full" style={{ maxHeight: '220px', objectFit: 'contain', background: '#fff' }} />
+          <div className="absolute top-1 right-1 flex gap-1">
+            <button type="button" onClick={() => setShowCanvas(true)}
+              className="p-1 rounded text-xs text-white" style={{ background: 'rgba(42,125,95,0.85)' }}>
+              <Pencil size={11} />
+            </button>
+            <button type="button" onClick={() => setDiagram(undefined)}
+              className="p-1 rounded text-xs text-white" style={{ background: 'rgba(220,38,38,0.8)' }}>
+              <XIcon size={11} />
+            </button>
+          </div>
+          <div className="px-2 py-0.5 text-[10px]" style={{ background: '#f8f9fb', color: '#6b7280', borderTop: '1px solid #e5e7eb' }}>📐 Math Diagram</div>
+        </div>
+      )}
+
+      {/* Math equation preview */}
+      {mathEquation && (
+        <div className="relative px-3 py-2 rounded-lg" style={{ background: '#fafbff', border: '1px solid #d1d5db' }}>
+          <div className="text-[10px] text-gray-400 mb-0.5">∑ Equation:</div>
+          <div className="text-sm font-serif tracking-wide" style={{ color: '#1a1a2e', whiteSpace: 'pre-wrap' }}>{mathEquation}</div>
+          <div className="absolute top-1 right-1 flex gap-1">
+            <button type="button" onClick={() => setShowEquation(true)}
+              className="p-1 rounded text-xs text-white" style={{ background: 'rgba(42,125,95,0.85)' }}>
+              <Pencil size={11} />
+            </button>
+            <button type="button" onClick={() => setMathEquation(undefined)}
+              className="p-1 rounded text-xs text-white" style={{ background: 'rgba(220,38,38,0.8)' }}>
+              <XIcon size={11} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modals */}
+      {showCanvas && (
+        <MathCanvas
+          initialData={diagram}
+          onSave={(dataUrl) => { setDiagram(dataUrl); setShowCanvas(false); }}
+          onClose={() => setShowCanvas(false)}
+        />
+      )}
+      {showEquation && (
+        <MathEquationInput
+          initialValue={mathEquation}
+          onInsert={(eq) => { setMathEquation(eq); setShowEquation(false); }}
+          onClose={() => setShowEquation(false)}
+        />
+      )}
 
       {/* OR Question Form */}
       {hasOrQuestion && (
@@ -472,6 +622,69 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
                     <div className="flex-1 min-w-0"><label className="block text-xs font-medium mb-1" style={labelStyle}>PO</label><select value={orQuestionPo} onChange={(e) => setOrQuestionPo(e.target.value)} className="w-full p-1 text-sm rounded-md" style={inputStyle}>{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <option key={i} value={i}>{i}</option>)}</select></div>
                   </div>
                </div>
+               )}
+
+               <div className="pt-2">
+                 <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: '#4b5563' }}>
+                     <input type="checkbox" checked={hasOrSubQuestions} onChange={(e) => {
+                         setHasOrSubQuestions(e.target.checked);
+                         if (e.target.checked && orSubQuestions.length === 0) addOrSubQuestion();
+                     }} className="rounded" style={{ accentColor: '#2a7d5f' }} />
+                     Add Sub-questions to OR Question
+                 </label>
+               </div>
+
+               {hasOrSubQuestions && (
+                   <div className="mt-3 space-y-3">
+                       <h4 className="text-sm font-semibold" style={{ color: '#4b5563' }}>OR Sub-questions (i, ii)</h4>
+                       {orSubQuestions.map((sub, idx) => (
+                           <div key={sub.id} className="flex gap-2 items-start">
+                               <span className="mt-2 text-xs font-mono font-bold" style={{ color: '#6b7280' }}>({['i','ii','iii','iv'][idx] || idx+1})</span>
+                               <div className="flex-1 space-y-1">
+                                    <SpellCheckedTextarea
+                                         value={sub.text}
+                                         as="input"
+                                         onChange={(v) => {
+                                             let val = v;
+                                             if (autoCapitalize) val = val.replace(/(?:^|[.!?]\s+)\w/g, c => c.toUpperCase());
+                                             if (allCaps) val = val.toUpperCase();
+                                             updateOrSubQuestion(idx, 'text', val);
+                                             checkRealTimeSuggestion(val, (s) => setOrSubSuggestion(s ? { idx, value: s } : null));
+                                         }}
+                                         placeholder="Sub-question text"
+                                         className="w-full p-1.5 text-sm rounded-md"
+                                         style={inputStyle}
+                                    />
+                                    {orSubSuggestion?.idx === idx && (
+                                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] mt-0.5" style={{ background: '#f0f7f4', border: '1px solid #c4e5d3', color: '#2a7d5f' }}>
+                                        <span className="opacity-70">Suggested:</span>
+                                        <span className="font-semibold truncate max-w-[120px]">&ldquo;...{orSubSuggestion.value.slice(-10)}&rdquo;</span>
+                                        <button type="button" onClick={() => { updateOrSubQuestion(idx, 'text', orSubSuggestion.value); setOrSubSuggestion(null); }}
+                                          className="font-bold underline" style={{ color: '#1e6b4f' }}>Apply</button>
+                                        <button type="button" onClick={() => setOrSubSuggestion(null)}
+                                          className="opacity-50">✕</button>
+                                      </div>
+                                    )}
+                                   <div className="flex gap-2">
+                                       <input type="number" placeholder="Marks (Opt)" value={sub.marks || ''} onChange={(e) => updateOrSubQuestion(idx, 'marks', e.target.value ? parseInt(e.target.value) : undefined)} className="w-20 p-1 text-xs rounded-md" style={inputStyle} />
+                                       {showBlCoPo && (<>
+                                       <select value={sub.bl || '1'} onChange={(e) => updateOrSubQuestion(idx, 'bl', e.target.value)} title="Bloom's Level" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6].map(i=><option key={i} value={i}>{i}</option>)}</select>
+                                       <select value={sub.co} onChange={(e) => updateOrSubQuestion(idx, 'co', e.target.value)} title="Course Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5].map(i=><option key={i} value={i}>{i}</option>)}</select>
+                                       <select value={sub.po} onChange={(e) => updateOrSubQuestion(idx, 'po', e.target.value)} title="Program Outcome" className="w-12 p-1 text-xs rounded-md" style={inputStyle}>{[1,2,3,4,5,6,7,8,9,10,11,12].map(i=><option key={i} value={i}>{i}</option>)}</select>
+                                       </>)}
+                                   </div>
+                               </div>
+                               <button type="button" onClick={() => removeOrSubQuestion(idx)} className="mt-1 p-1 rounded transition-colors" style={{ color: '#c4c9d1' }}
+                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#dc2626')}
+                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#c4c9d1')}
+                               ><Trash2 size={14}/></button>
+                           </div>
+                       ))}
+                       <button type="button" onClick={addOrSubQuestion} className="text-xs transition-colors" style={{ color: '#2a7d5f' }}
+                         onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                         onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                       >+ Add Sub-question to OR</button>
+                   </div>
                )}
           </div>
       )}

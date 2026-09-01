@@ -81,61 +81,30 @@ export async function exportToPDF(
       const halfWidth = pdfWidth / 2;
       const padding = 3;
 
-      // Place 2 pages per sheet, side by side
-      for (let i = 0; i < canvases.length; i += 2) {
+      // Each paper page gets its own landscape PDF page with two identical copies side by side
+      for (let i = 0; i < canvases.length; i++) {
         if (i > 0) pdf.addPage();
 
-        // Left page
-        const leftCanvas = canvases[i];
-        const leftAspect = leftCanvas.height / leftCanvas.width;
-        const leftSlotW = halfWidth - padding * 2;
-        const leftSlotH = pdfHeight - padding * 2;
-        let leftW = leftSlotW;
-        let leftH = leftW * leftAspect;
-        if (leftH > leftSlotH) {
-          leftH = leftSlotH;
-          leftW = leftH / leftAspect;
+        const pageCanvas = canvases[i];
+        const aspect = pageCanvas.height / pageCanvas.width;
+        const slotW = halfWidth - padding * 2;
+        const slotH = pdfHeight - padding * 2;
+        let imgW = slotW;
+        let imgH = imgW * aspect;
+        if (imgH > slotH) {
+          imgH = slotH;
+          imgW = imgH / aspect;
         }
-        const leftX = padding + (leftSlotW - leftW) / 2;
-        const leftY = padding + (leftSlotH - leftH) / 2;
-        pdf.addImage(
-          leftCanvas.toDataURL("image/jpeg", 0.95),
-          "JPEG",
-          leftX,
-          leftY,
-          leftW,
-          leftH
-        );
+        const offsetY = padding + (slotH - imgH) / 2;
+        const imgDataUrl = pageCanvas.toDataURL("image/jpeg", 0.95);
 
-        // Right page (if exists, or duplicate for single-page cycle test split view)
-        let rightCanvas = null;
-        if (i + 1 < canvases.length) {
-          rightCanvas = canvases[i + 1];
-        } else if (canvases.length === 1) {
-          rightCanvas = leftCanvas;
-        }
+        // Left copy
+        const leftX = padding + (slotW - imgW) / 2;
+        pdf.addImage(imgDataUrl, "JPEG", leftX, offsetY, imgW, imgH);
 
-        if (rightCanvas) {
-          const rightAspect = rightCanvas.height / rightCanvas.width;
-          const rightSlotW = halfWidth - padding * 2;
-          const rightSlotH = pdfHeight - padding * 2;
-          let rightW = rightSlotW;
-          let rightH = rightW * rightAspect;
-          if (rightH > rightSlotH) {
-            rightH = rightSlotH;
-            rightW = rightH / rightAspect;
-          }
-          const rightX = halfWidth + padding + (rightSlotW - rightW) / 2;
-          const rightY = padding + (rightSlotH - rightH) / 2;
-          pdf.addImage(
-            rightCanvas.toDataURL("image/jpeg", 0.95),
-            "JPEG",
-            rightX,
-            rightY,
-            rightW,
-            rightH
-          );
-        }
+        // Right copy (identical)
+        const rightX = halfWidth + padding + (slotW - imgW) / 2;
+        pdf.addImage(imgDataUrl, "JPEG", rightX, offsetY, imgW, imgH);
       }
     } else {
       // Portrait A4: 210mm x 297mm (Standard vertical format for Model Exams)
@@ -143,13 +112,28 @@ export async function exportToPDF(
       for (let i = 0; i < canvases.length; i++) {
         if (i > 0) pdf.addPage();
         const canvas = canvases[i];
+        
+        const aspect = canvas.height / canvas.width;
+        let imgW = 210;
+        let imgH = 210 * aspect;
+        
+        // If the height exceeds A4 height, scale down to fit height
+        if (imgH > 297) {
+          imgH = 297;
+          imgW = imgH / aspect;
+        }
+        
+        // Center the image on the page
+        const x = (210 - imgW) / 2;
+        const y = (297 - imgH) / 2;
+
         pdf.addImage(
           canvas.toDataURL("image/jpeg", 0.95),
           "JPEG",
-          0,
-          0,
-          210,
-          297
+          x,
+          y,
+          imgW,
+          imgH
         );
       }
     }

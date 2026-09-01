@@ -33,10 +33,10 @@ const formatDateDDMMYYYY = (dateStr: string) => {
 const initialPaperData: PaperData = {
   header: {
     institutionName: "SRM Institute of Science and Technology",
-    college: "Faculty of Science and Humanities, KTRR",
-    department: "Department of Computer Applications, ",
-    examName: "Model Examination, ",
-    subject: "",
+    college: "Faculty of Science and Humanities, KTR",
+    department: "Department of Computer Applications",
+    examName: "Model Examination",
+    subject: "Software Engineering",
     courseCode: "",
     class: "",
     semester: "",
@@ -66,35 +66,36 @@ const initialPaperData: PaperData = {
 };
 
 const DEPARTMENTS = [
-  "Department of Biochemistry, ",
-  "Department of Biotechnology, ",
-  "Career Development Centre, ",
-  "Department of Commerce, ",
+  "Department of Biochemistry",
+  "Department of Biotechnology",
+  "Career Development Centre",
+  "Department of Commerce",
   "Department of Computer Applications",
-  "Department of Computer Science, ",
-  "Department of Corporate Secretaryship and Accounting & Finance, ",
-  "Department of Defence and Strategic Studies, ",
-  "School of Education, ",
-  "Department of Economics, ",
-  "Department of English, , ",
-  "Department of Fashion Designing, ",
-  "Department of French, ",
-  "Department of Hindi, ",
-  "Institute of Hotel and Catering Management, ",
-  "Department of Journalism and Mass Communication, ",
-  "Department of Mathematics and Statistics, ",
-  "Department of Physical Education & Sports Sciences, ",
-  "Department of Psychology, ",
-  "Department of Social Work, ",
-  "Department of Tamil, ",
-  "Department of Visual Communication, ",
-  "Department of Yoga, "
+  "Department of Computer Science",
+  "Department of Corporate Secretaryship and Accounting & Finance",
+  "Department of Defence and Strategic Studies",
+  "School of Education",
+  "Department of Economics",
+  "Department of English",
+  "Department of Fashion Designing",
+  "Department of French",
+  "Department of Hindi",
+  "Institute of Hotel and Catering Management",
+  "Department of Journalism and Mass Communication",
+  "Department of Mathematics and Statistics",
+  "Department of Physical Education & Sports Sciences",
+  "Department of Psychology",
+  "Department of Social Work",
+  "Department of Tamil",
+  "Department of Visual Communication",
+  "Department of Yoga"
 ];
 
 const EXAMS = [
-  "Cycle Test – I, ",
-  "Cycle Test – II, ",
-  "Model Examination"
+  "Cycle Test – I",
+  "Cycle Test – II",
+  "Model Examination",
+  "End Semester Examination"
 ];
 
 interface SyllabusCourse {
@@ -1207,7 +1208,16 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>College</label>
-                  <input type="text" readOnly value={paperData.header.college || ''} placeholder="Faculty of Science and Humanities, KTR" className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #e2e5ea', color: '#6b7280', backgroundColor: '#f9fafb', cursor: 'not-allowed', textTransform: allCaps ? 'uppercase' : 'none' }} />
+                  <select
+                    value={paperData.header.college || ''}
+                    onChange={(e) => handleHeaderChange('college', e.target.value)}
+                    className="w-full p-2 text-sm rounded-md"
+                    style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5', textTransform: allCaps ? 'uppercase' : 'none' }}
+                  >
+                    <option value="">Select College</option>
+                    <option value="FACULTY OF SCIENCE AND HUMANITIES">FACULTY OF SCIENCE AND HUMANITIES</option>
+                    <option value="FACULTY OF LIBERAL ARTS AND BUSINESS STUDIES (FLABS)">FACULTY OF LIBERAL ARTS AND BUSINESS STUDIES (FLABS)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Department</label>
@@ -1798,16 +1808,20 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
 
             <div style={{ borderTop: '1px solid #e2e5ea', paddingTop: '16px' }}>
               <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#9ca3af' }}>Layout Settings</h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Line Spacing</label>
                   <input type="number" min="1.0" max="3.0" step="0.1" value={paperData.settings?.lineHeight || 1.5} onChange={(e) => updateSettings('lineHeight', parseFloat(e.target.value))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Font Size (pt)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Q. Font (pt)</label>
                   <input type="number" min="8" max="24" value={paperData.settings?.fontSize || 12} onChange={(e) => updateSettings('fontSize', parseInt(e.target.value) || 12)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
                 </div>
-                <div className="col-span-2">
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Head Font (pt)</label>
+                  <input type="number" min="8" max="24" value={paperData.settings?.headerFontSize || 12} onChange={(e) => updateSettings('headerFontSize', parseInt(e.target.value) || 12)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                </div>
+                <div className="col-span-3">
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Margins (mm)</label>
                   <div className="grid grid-cols-4 gap-2">
                     <input title="Top" type="number" placeholder="Top" value={paperData.settings?.marginTop ?? ''} onChange={(e) => updateSettings('marginTop', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />

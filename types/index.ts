@@ -10,7 +10,10 @@ export interface Question {
     po?: string; // Program Outcome
     orQuestion?: Question; // For either/or choice
     subQuestions?: Question[]; // For i, ii, iii parts
+    diagram?: string;       // base64 PNG from MathCanvas
+    mathEquation?: string;  // unicode math equation string
 }
+
 
 export interface Section {
     id: string;
@@ -44,7 +47,8 @@ export interface PageSettings {
     marginBottom: number; // mm
     marginLeft: number; // mm
     marginRight: number; // mm
-    fontSize: number; // pt
+    fontSize: number; // pt (for questions)
+    headerFontSize?: number; // pt (for headers and section titles)
     lineHeight: number; // Unitless (e.g., 1.5)
 }
 

@@ -23,7 +23,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
   const measureRef = useRef<HTMLDivElement>(null);
   const [pageGroups, setPageGroups] = useState<number[][] | null>(null);
 
-  // Build flat content items + track manual break positions
+  // Build flat content items + track manual break positions.
   const { contentNodes, breakBefore } = useMemo(() => {
     const nodes: React.ReactNode[] = [];
     const breaks = new Set<number>();
@@ -31,7 +31,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
     // Header
     nodes.push(
-      <div key="header" className="mb-4 relative">
+      <div key="header" className="relative" style={{ marginBottom: '1em', fontSize: `${data.settings?.headerFontSize ?? 12}pt`, lineHeight: 1.5 }}>
         {showLogo && data.header.logo && (
           <img src={data.header.logo} alt="Logo" style={{ position: 'absolute', top: 0, left: 0, width: `${logoSize}px`, height: `${logoSize}px`, objectFit: 'contain', filter: 'grayscale(100%)' }} />
         )}
@@ -40,12 +40,12 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           {data.header.college && <h2 className="font-bold uppercase leading-tight">{data.header.college}</h2>}
           {data.header.department && <h2 className="font-bold uppercase leading-tight">{data.header.department}</h2>}
           <h2 className="font-bold uppercase leading-tight">{data.header.examName}</h2>
-          <h3 className="font-bold uppercase leading-tight mb-6">
+          <h3 className="font-bold uppercase leading-tight" style={{ marginBottom: '1.5em' }}>
             {data.header.courseCode && <span>{data.header.courseCode} – </span>}
             {data.header.subject}
           </h3>
         </div>
-        <div className="flex flex-col gap-1 mt-2 pb-0">
+        <div className="flex flex-col pb-0" style={{ gap: '0.25em', marginTop: '0.5em' }}>
           <div className="flex justify-between items-center">
             <span className="font-bold">Class: {data.header.class}</span>
             {showDate && data.header.date ? (
@@ -56,11 +56,11 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           </div>
           <div className="flex justify-between items-center">
             <span className="font-bold">Semester: {data.header.semester}</span>
-            <div className="flex items-center gap-2">
-              <span className="font-bold" style={{ lineHeight: '24px' }}>Reg. No:</span>
-              <div className="flex border border-black bg-white">
+            <div className="flex items-center" style={{ gap: '0.5em' }}>
+              <span className="font-bold">Reg. No:</span>
+              <div style={{ display: 'flex', border: '1px solid #000', background: '#fff', transform: 'translateY(0.1em)' }}>
                 {Array.from({ length: regBoxCount }).map((_, i) => (
-                  <div key={i} className="w-5 h-6 border-r last:border-r-0 border-black flex items-center justify-center font-mono font-bold" style={{ fontSize: '0.75em' }}>
+                  <div key={i} style={{ width: '1.4em', height: '1.6em', borderRight: i < regBoxCount - 1 ? '1px solid #000' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.75em' }}>
                     {data.header.registerNumber ? data.header.registerNumber[i] || "" : ""}
                   </div>
                 ))}
@@ -68,39 +68,38 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
             </div>
           </div>
         </div>
-        <div className="flex justify-between font-bold mt-1">
+        <div className="flex justify-between font-bold" style={{ marginTop: '0.25em' }}>
           <span>Duration: {data.header.duration}</span>
           <span>Max. Marks: {data.header.totalMarks}</span>
         </div>
       </div>
     );
 
-    // Continuous question numbering across all parts
+    // Sections & Questions
     let globalQIndex = 0;
 
     data.sections.forEach((section) => {
-      // Section header
       nodes.push(
-        <div key={`sec-${section.id}-header`} className="mb-4">
-          <div className="flex justify-between items-baseline mb-2 mt-2 border-b border-black pb-1">
-            <div className="flex items-baseline gap-2">
-              <h4 className="font-bold uppercase">Part {section.part}</h4>
+        <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.25em', fontSize: `${data.settings?.headerFontSize ?? 12}pt`, lineHeight: 1.5 }}>
+          <div className="flex justify-between items-end border-b border-black" style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
+            <div className="flex items-baseline" style={{ gap: '0.5em' }}>
+              <h4 className="font-bold uppercase whitespace-nowrap">Part {section.part}</h4>
               <span className="font-bold">
                 {section.requiredCount === 'ALL' ? 'Answer ALL questions' : `Answer any ${section.requiredCount} questions`}
               </span>
             </div>
             {section.defaultMarks !== undefined && (
-              <div className="font-bold">
+              <div className="font-bold whitespace-nowrap">
                 <span>({section.requiredCount === 'ALL' ? section.questions.filter(q => q.type !== 'break').length : section.requiredCount} x {section.defaultMarks} = {(section.requiredCount === 'ALL' ? section.questions.filter(q => q.type !== 'break').length : parseInt(section.requiredCount)) * section.defaultMarks} Marks)</span>
               </div>
             )}
           </div>
           {showBlCoPo && (
-            <div className="flex font-bold mb-2 text-right" style={{ fontSize: '0.85em' }}>
+            <div className="flex font-bold text-right" style={{ fontSize: '0.85em' }}>
               <div className="flex-1 text-left"></div>
-              <div className="w-8 text-center">BL</div>
-              <div className="w-8 text-center">CO</div>
-              <div className="w-8 text-center">PO</div>
+              <div style={{ width: '2em', textAlign: 'center' }}>BL</div>
+              <div style={{ width: '2em', textAlign: 'center' }}>CO</div>
+              <div style={{ width: '2em', textAlign: 'center' }}>PO</div>
             </div>
           )}
         </div>
@@ -108,35 +107,35 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
       section.questions.forEach((question) => {
         if (question.type === 'break') {
-          breaks.add(nodes.length); // break BEFORE the next item
+          breaks.add(nodes.length);
         } else {
           globalQIndex++;
           const qNum = globalQIndex;
           nodes.push(
-            <div key={question.id} className="flex gap-2 mb-3 break-inside-avoid">
-              <span className="w-6 shrink-0 font-normal">{qNum}.</span>
+            <div key={question.id} className="flex break-inside-avoid" style={{ gap: '0.5em', marginBottom: '0.75em' }}>
+              <span className="shrink-0 font-normal" style={{ width: '1.5em' }}>{qNum}.</span>
               <div className="flex-1">
                 <div className="flex justify-between items-baseline">
-                  <div className="text-justify pr-4 flex-1">
+                  <div className="text-justify flex-1" style={{ paddingRight: '1em' }}>
                     <p>
-                      {question.orQuestion && <span className="font-bold mr-2">A.</span>}
+                      {question.orQuestion && <span className="mr-2">A.</span>}
                       {question.text}
                     </p>
                   </div>
                   {showBlCoPo && (
                     <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                      <span className="w-8 text-center block">{question.bl || '1'}</span>
-                      <span className="w-8 text-center block">{question.co}</span>
-                      <span className="w-8 text-center block">{question.po}</span>
+                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.bl || '1'}</span>
+                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.co}</span>
+                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.po}</span>
                     </div>
                   )}
                 </div>
                 {question.subQuestions && question.subQuestions.length > 0 && (
-                  <div className="mt-1 space-y-1">
+                  <div className="space-y-1" style={{ marginTop: '0.25em' }}>
                     {question.subQuestions.map((sub, sIdx) => (
                       <div key={sub.id} className="flex justify-between items-baseline">
-                        <div className="flex gap-2 flex-1 pr-4 text-justify">
-                          <span className="w-6 text-right shrink-0">{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
+                        <div className="flex flex-1 text-justify" style={{ gap: '0.5em', paddingRight: '1em' }}>
+                          <span className="text-right shrink-0" style={{ width: '1.5em' }}>{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
                           <div className="flex-1 flex justify-between">
                             <span>{sub.text}</span>
                             <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
@@ -146,9 +145,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                         </div>
                         {showBlCoPo && (
                           <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                            <span className="w-8 text-center block">{sub.bl || '1'}</span>
-                            <span className="w-8 text-center block">{sub.co}</span>
-                            <span className="w-8 text-center block">{sub.po}</span>
+                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
+                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.co}</span>
+                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.po}</span>
                           </div>
                         )}
                       </div>
@@ -159,24 +158,64 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                   <div className="my-2 text-center">
                     <span className="font-bold uppercase my-1 block">(OR)</span>
                     <div className="flex justify-between items-baseline text-left font-normal">
-                      <p className="text-justify pr-4 flex-1">
-                        <span className="font-bold mr-2">B.</span>
+                      <p className="text-justify flex-1" style={{ paddingRight: '1em' }}>
+                        <span className="mr-2">B.</span>
                         {question.orQuestion.text}
                       </p>
                       {showBlCoPo && (
                         <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                          <span className="w-8 text-center block">{question.orQuestion.bl || '1'}</span>
-                          <span className="w-8 text-center block">{question.orQuestion.co}</span>
-                          <span className="w-8 text-center block">{question.orQuestion.po}</span>
+                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.bl || '1'}</span>
+                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.co}</span>
+                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.po}</span>
                         </div>
                       )}
                     </div>
+                    {question.orQuestion.subQuestions && question.orQuestion.subQuestions.length > 0 && (
+                      <div className="space-y-1 text-left font-normal" style={{ marginTop: '0.25em' }}>
+                        {question.orQuestion.subQuestions.map((sub, sIdx) => (
+                          <div key={sub.id} className="flex justify-between items-baseline">
+                            <div className="flex flex-1 text-justify" style={{ gap: '0.5em', paddingRight: '1em' }}>
+                              <span className="text-right shrink-0" style={{ width: '1.5em' }}>{['i','ii','iii','iv'][sIdx] || sIdx+1})</span>
+                              <div className="flex-1 flex justify-between">
+                                <span>{sub.text}</span>
+                                <span className="font-mono ml-2 shrink-0 text-gray-600" style={{ fontSize: '0.85em' }}>
+                                  {sub.marks ? `[${sub.marks}]` : ''}
+                                </span>
+                              </div>
+                            </div>
+                            {showBlCoPo && (
+                              <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
+                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
+                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.co}</span>
+                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.po}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Math Equation */}
+                {question.mathEquation && (
+                  <div style={{ marginTop: '0.35em', marginBottom: '0.2em', fontFamily: '"Times New Roman", Times, serif', fontSize: '1em', whiteSpace: 'pre-wrap', textAlign: 'center' }}>
+                    {question.mathEquation}
+                  </div>
+                )}
+                {/* Diagram */}
+                {question.diagram && (
+                  <div style={{ marginTop: '0.5em', textAlign: 'center' }}>
+                    <img
+                      src={question.diagram}
+                      alt="Math diagram"
+                      style={{ maxWidth: '80%', maxHeight: '180px', objectFit: 'contain', display: 'inline-block' }}
+                    />
                   </div>
                 )}
                 {question.type === 'mcq' && question.options && (
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-1 mt-1 ml-4">
+                  <div className="grid grid-cols-2" style={{ columnGap: '2em', rowGap: '0.25em', marginTop: '0.25em', marginLeft: '1em' }}>
                     {question.options.map((opt, i) => (
-                      <div key={i} className="flex gap-1">
+                      <div key={i} className="flex" style={{ gap: '0.25em' }}>
                         <span className="font-bold">({String.fromCharCode(97 + i)})</span>
                         <span>{opt}</span>
                       </div>
@@ -193,117 +232,111 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
     return { contentNodes: nodes, breakBefore: breaks };
   }, [data, showBlCoPo, showLogo, logoSize, showDate]);
 
-  // Measure content and auto-paginate
+  const fontSize     = data.settings?.fontSize     ?? 12;
+  const lineHeight   = data.settings?.lineHeight   ?? 1.5;
+  const marginTop    = data.settings?.marginTop    ?? 15;
+  const marginBottom = data.settings?.marginBottom ?? 15;
+  const marginLeft   = data.settings?.marginLeft   ?? 15;
+  const marginRight  = data.settings?.marginRight  ?? 15;
+
   useEffect(() => {
-    if (!measureRef.current || contentNodes.length === 0) return;
+    if (contentNodes.length === 0) return;
 
-    // Small delay to ensure DOM is fully laid out
+    setPageGroups(null);
+
+    let rafId: number;
+
     const timer = setTimeout(() => {
-      const container = measureRef.current;
-      if (!container) return;
-      const children = Array.from(container.children) as HTMLElement[];
-      if (children.length !== contentNodes.length) return;
+      rafId = requestAnimationFrame(() => {
+        const container = measureRef.current;
+        if (!container) return;
 
-      const containerRect = container.getBoundingClientRect();
-      const paddingTop = parseFloat(getComputedStyle(container).paddingTop);
+        const children = Array.from(container.children) as HTMLElement[];
+        if (children.length !== contentNodes.length) return;
 
-      // Calculate usable page height: container width = 210mm
-      const pxPerMm = containerRect.width / 210;
-      const marginTop = data.settings?.marginTop ?? 15;
-      const marginBottom = data.settings?.marginBottom ?? 15;
-      // Add 2mm safety buffer so content doesn't press against the bottom margin
-      const safetyBuffer = 0.5;
-      const usableHeight = (297 - marginTop - marginBottom - safetyBuffer) * pxPerMm;
+        const pxPerMm = container.getBoundingClientRect().width / 210;
+        const SAFETY_MM = 2;
+        const usableHeightPx = (297 - marginTop - marginBottom - SAFETY_MM) * pxPerMm;
 
-      // Use cumulative offsets from the container to properly account for margins
-      const contentAreaTop = containerRect.top + paddingTop;
+        const childHeights: number[] = children.map(child => {
+          const cs = getComputedStyle(child);
+          const mt = parseFloat(cs.marginTop)    || 0;
+          const mb = parseFloat(cs.marginBottom) || 0;
+          return child.getBoundingClientRect().height + mt + mb;
+        });
 
-      // Get the bottom edge position of each child relative to content area start
-      const childBottoms: number[] = [];
-      const childTops: number[] = [];
-      for (let i = 0; i < children.length; i++) {
-        const rect = children[i].getBoundingClientRect();
-        childTops.push(rect.top - contentAreaTop);
-        childBottoms.push(rect.bottom - contentAreaTop);
-      }
+        const groups: number[][] = [[]];
+        let currentGroup = 0;
+        let cursorPx = 0; 
 
-      const groups: number[][] = [[]];
-      let currentGroup = 0;
-      let pageStartOffset = 0; // tracks where the current page starts in the measuring container
+        for (let i = 0; i < children.length; i++) {
+          const itemHeight = childHeights[i];
 
-      for (let i = 0; i < children.length; i++) {
-        // Height this child would occupy on the current page
-        const relativeBottom = childBottoms[i] - pageStartOffset;
+          if (breakBefore.has(i) && groups[currentGroup].length > 0) {
+            groups.push([]);
+            currentGroup++;
+            cursorPx = 0;
+          }
 
-        // Manual break
-        if (breakBefore.has(i) && groups[currentGroup].length > 0) {
-          groups.push([]);
-          currentGroup++;
-          pageStartOffset = childTops[i];
+          if (cursorPx + itemHeight > usableHeightPx && groups[currentGroup].length > 0) {
+            groups.push([]);
+            currentGroup++;
+            cursorPx = 0;
+          }
+
+          groups[currentGroup].push(i);
+          cursorPx += itemHeight;
         }
 
-        // Auto overflow: if this child's bottom exceeds usable height from page start
-        const relativeBottomUpdated = childBottoms[i] - pageStartOffset;
-        if (relativeBottomUpdated > usableHeight && groups[currentGroup].length > 0) {
-          groups.push([]);
-          currentGroup++;
-          pageStartOffset = childTops[i];
-        }
+        setPageGroups(groups);
+      });
+    }, 150);
 
-        groups[currentGroup].push(i);
-      }
+    return () => {
+      clearTimeout(timer);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [contentNodes, breakBefore, fontSize, lineHeight, marginTop, marginBottom, marginLeft, marginRight]);
 
-      setPageGroups(groups);
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [contentNodes, breakBefore, data.settings]);
-
-  // Build final pages
   const actualPages = pageGroups
     ? pageGroups.map(group => group.map(i => contentNodes[i]))
-    : [contentNodes]; // fallback before measurement
+    : [contentNodes];
 
-  const pageStyle = {
-    width: '210mm',
-    height: '297mm',
-    paddingTop: `${data.settings?.marginTop ?? 15}mm`,
-    paddingBottom: `${data.settings?.marginBottom ?? 15}mm`,
-    paddingLeft: `${data.settings?.marginLeft ?? 15}mm`,
-    paddingRight: `${data.settings?.marginRight ?? 15}mm`,
-    boxSizing: 'border-box' as const,
-    fontSize: `${data.settings?.fontSize ?? 12}pt`,
-    lineHeight: data.settings?.lineHeight || 1.5,
-    fontFamily: '"Times New Roman", Times, serif',
-    color: '#000',
-    overflow: 'hidden' as const,
+  const pageStyle: React.CSSProperties = {
+    width:         '210mm',
+    height:        '297mm',
+    paddingTop:    `${marginTop}mm`,
+    paddingBottom: `${marginBottom}mm`,
+    paddingLeft:   `${marginLeft}mm`,
+    paddingRight:  `${marginRight}mm`,
+    boxSizing:     'border-box',
+    fontSize:      `${fontSize}pt`,
+    lineHeight:     lineHeight,
+    fontFamily:    '"Times New Roman", Times, serif',
+    color:         '#000',
+    overflow:      'hidden',
+  };
+
+  const measureStyle: React.CSSProperties = {
+    position:    'absolute',
+    top:          0,
+    left:        '-99999px',
+    visibility:  'hidden',
+    width:        '210mm',
+    paddingLeft: `${marginLeft}mm`,
+    paddingRight:`${marginRight}mm`,
+    boxSizing:   'border-box',
+    fontSize:    `${fontSize}pt`,
+    lineHeight:   lineHeight,
+    fontFamily:  '"Times New Roman", Times, serif',
   };
 
   return (
     <div className="flex flex-col items-center relative" ref={ref}>
-      {/* Hidden measuring container */}
-      <div
-        ref={measureRef}
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: '-99999px',
-          visibility: 'hidden' as const,
-          width: '210mm',
-          paddingLeft: `${data.settings?.marginLeft ?? 15}mm`,
-          paddingRight: `${data.settings?.marginRight ?? 15}mm`,
-          paddingTop: `${data.settings?.marginTop ?? 15}mm`,
-          boxSizing: 'border-box',
-          fontSize: `${data.settings?.fontSize ?? 12}pt`,
-          lineHeight: data.settings?.lineHeight || 1.5,
-          fontFamily: '"Times New Roman", Times, serif',
-        }}
-      >
+      <div ref={measureRef} aria-hidden="true" style={measureStyle}>
         {contentNodes}
       </div>
 
-      {/* Actual pages */}
       <div className="space-y-8 print:space-y-0 pb-20 transition-transform origin-top print-reset-transform" style={{ transform: `scale(${scale})` }}>
         {actualPages.map((pageContent, pageIndex) => (
           <div
@@ -312,7 +345,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
             className={`bg-white shadow-2xl print:shadow-none print:m-0 mx-auto relative group ${pageIndex < actualPages.length - 1 ? 'print:break-after-page break-after-page' : ''}`}
             style={pageStyle}
           >
-            {/* Watermark */}
             {showWatermark && data.header.logo && (
               <div style={{
                 position: 'absolute',
@@ -329,7 +361,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
               </div>
             )}
 
-            {/* Page Number */}
             <div className="absolute bottom-2 right-4 text-xs text-gray-400 print:hidden">Page {pageIndex + 1}</div>
 
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -339,7 +370,6 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
         ))}
       </div>
 
-      {/* Zoom Control */}
       <div className="fixed bottom-4 right-6 flex items-center gap-3 px-3 py-2 rounded-lg print:hidden z-20" style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid #e2e5ea', backdropFilter: 'blur(4px)', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
         <span className="text-xs font-semibold" style={{ color: '#6b7280' }}>Zoom</span>
         <input type="range" min="0.4" max="1.5" step="0.05" value={scale} onChange={(e) => setScale(parseFloat(e.target.value))} className="w-24 h-1.5 rounded-lg appearance-none cursor-pointer" style={{ accentColor: '#2a7d5f' }} />
