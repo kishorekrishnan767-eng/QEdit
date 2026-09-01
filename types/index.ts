@@ -11,6 +11,7 @@ export interface Question {
     orQuestion?: Question; // For either/or choice
     subQuestions?: Question[]; // For i, ii, iii parts
     diagram?: string;       // base64 PNG from MathCanvas
+    diagramPosition?: 'left' | 'center' | 'right'; // Optional positioning for diagram
     mathEquation?: string;  // unicode math equation string
 }
 

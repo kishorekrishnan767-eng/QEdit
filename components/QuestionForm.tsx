@@ -53,6 +53,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
 
   // Math tools state
   const [diagram, setDiagram]             = useState<string | undefined>(undefined);
+  const [diagramPosition, setDiagramPosition] = useState<'left' | 'center' | 'right'>('center');
   const [mathEquation, setMathEquation]   = useState<string | undefined>(undefined);
   const [showCanvas, setShowCanvas]       = useState(false);
   const [showEquation, setShowEquation]   = useState(false);
@@ -103,6 +104,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       }
 
       setDiagram(editingQuestion.diagram);
+      setDiagramPosition(editingQuestion.diagramPosition || 'center');
       setMathEquation(editingQuestion.mathEquation);
 
     } else {
@@ -120,6 +122,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       setHasOrSubQuestions(false);
       setOrSubQuestions([]);
       setDiagram(undefined);
+      setDiagramPosition('center');
       setMathEquation(undefined);
     }
   }, [editingQuestion, sectionDefaultMarks]);
@@ -171,6 +174,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       orQuestion: orQuestionObj,
       subQuestions: correctedSubs,
       diagram:      diagram || undefined,
+      diagramPosition: diagram ? diagramPosition : undefined,
       mathEquation: mathEquation?.trim() || undefined,
     };
 
@@ -189,6 +193,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
         setHasOrSubQuestions(false);
         setOrSubQuestions([]);
         setDiagram(undefined);
+        setDiagramPosition('center');
         setMathEquation(undefined);
         setMainSuggestion(null);
         setOrSuggestion(null);
@@ -543,7 +548,20 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
               <XIcon size={11} />
             </button>
           </div>
-          <div className="px-2 py-0.5 text-[10px]" style={{ background: '#f8f9fb', color: '#6b7280', borderTop: '1px solid #e5e7eb' }}>📐 Math Diagram</div>
+          <div className="px-2 py-1.5 flex items-center justify-between" style={{ background: '#f8f9fb', borderTop: '1px solid #e5e7eb' }}>
+            <span className="text-[10px]" style={{ color: '#6b7280' }}>📐 Math Diagram</span>
+            <div className="flex gap-3 text-[10px]" style={{ color: '#4b5563' }}>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input type="radio" name="diagPos" checked={diagramPosition === 'left'} onChange={() => setDiagramPosition('left')} style={{ accentColor: '#2a7d5f' }} /> Left
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input type="radio" name="diagPos" checked={diagramPosition === 'center'} onChange={() => setDiagramPosition('center')} style={{ accentColor: '#2a7d5f' }} /> Center
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input type="radio" name="diagPos" checked={diagramPosition === 'right'} onChange={() => setDiagramPosition('right')} style={{ accentColor: '#2a7d5f' }} /> Right
+              </label>
+            </div>
+          </div>
         </div>
       )}
 

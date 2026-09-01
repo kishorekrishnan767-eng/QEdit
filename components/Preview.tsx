@@ -198,13 +198,13 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                 )}
                 {/* Math Equation */}
                 {question.mathEquation && (
-                  <div style={{ marginTop: '0.35em', marginBottom: '0.2em', fontFamily: '"Times New Roman", Times, serif', fontSize: '1em', whiteSpace: 'pre-wrap', textAlign: 'center' }}>
+                  <div style={{ marginTop: '0.35em', marginBottom: '0.2em', fontFamily: '"Times New Roman", Times, serif', fontSize: '1em', whiteSpace: 'pre-wrap', textAlign: 'left' }}>
                     {question.mathEquation}
                   </div>
                 )}
                 {/* Diagram */}
                 {question.diagram && (
-                  <div style={{ marginTop: '0.5em', textAlign: 'center' }}>
+                  <div style={{ marginTop: '0.5em', textAlign: question.diagramPosition || 'center' }}>
                     <img
                       src={question.diagram}
                       alt="Math diagram"

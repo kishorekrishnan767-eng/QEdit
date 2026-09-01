@@ -60,6 +60,7 @@ export default function MathCanvas({ initialData, onSave, onClose }: MathCanvasP
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPt, setStartPt] = useState<Point>({ x: 0, y: 0 });
   const [history, setHistory] = useState<ImageData[]>([]);
+  const [previewCrop, setPreviewCrop] = useState<string | null>(null);
 
   // Snapshot helper
   const snapshot = useCallback(() => {
@@ -317,114 +318,190 @@ export default function MathCanvas({ initialData, onSave, onClose }: MathCanvasP
   };
 
   const handleSave = () => {
-    const dataUrl = canvasRef.current?.toDataURL("image/png") ?? "";
-    onSave(dataUrl);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+    
+    let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+    let hasContent = false;
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        // Check if not white (r=255, g=255, b=255)
+        if (data[i] !== 255 || data[i+1] !== 255 || data[i+2] !== 255) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+          hasContent = true;
+        }
+      }
+    }
+    
+    if (!hasContent) {
+      setPreviewCrop(canvas.toDataURL("image/png"));
+      return;
+    }
+    
+    // Add padding
+    const padding = 20;
+    minX = Math.max(0, minX - padding);
+    minY = Math.max(0, minY - padding);
+    maxX = Math.min(canvas.width, maxX + padding);
+    maxY = Math.min(canvas.height, maxY + padding);
+    
+    const cropWidth = maxX - minX;
+    const cropHeight = maxY - minY;
+    
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = cropWidth;
+    cropCanvas.height = cropHeight;
+    const cropCtx = cropCanvas.getContext('2d');
+    if (!cropCtx) return;
+    
+    cropCtx.fillStyle = "#ffffff";
+    cropCtx.fillRect(0, 0, cropWidth, cropHeight);
+    cropCtx.putImageData(ctx.getImageData(minX, minY, cropWidth, cropHeight), 0, 0);
+    
+    setPreviewCrop(cropCanvas.toDataURL("image/png"));
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
       <div className="flex flex-col rounded-xl overflow-hidden shadow-2xl" style={{ background: "#1a1a2e", width: "min(98vw, 900px)", maxHeight: "95vh" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3" style={{ background: "#0f172a", borderBottom: "1px solid #2a3a5e" }}>
-          <span className="text-white font-semibold text-sm">📐 Math Diagram Canvas</span>
+          <span className="text-white font-semibold text-sm">
+            {previewCrop ? "✨ Confirm Cropped Diagram" : "📐 Math Diagram Canvas"}
+          </span>
           <div className="flex gap-2">
-            <button type="button" onClick={undo} title="Undo" className="flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-300 hover:text-white transition-colors">
-              <Undo2 size={14} /> Undo
-            </button>
-            <button type="button" onClick={clearCanvas} title="Clear" className="flex items-center gap-1 px-2 py-1 rounded text-xs text-red-400 hover:text-red-300 transition-colors">
-              <Trash2 size={14} /> Clear
-            </button>
-            <button type="button" onClick={handleSave} className="flex items-center gap-1 px-3 py-1 rounded text-xs font-medium text-white transition-colors" style={{ background: "#2a7d5f" }}>
-              <Check size={14} /> Insert
-            </button>
+            {!previewCrop && (
+              <>
+                <button type="button" onClick={undo} title="Undo" className="flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-300 hover:text-white transition-colors">
+                  <Undo2 size={14} /> Undo
+                </button>
+                <button type="button" onClick={clearCanvas} title="Clear" className="flex items-center gap-1 px-2 py-1 rounded text-xs text-red-400 hover:text-red-300 transition-colors">
+                  <Trash2 size={14} /> Clear
+                </button>
+                <button type="button" onClick={handleSave} className="flex items-center gap-1 px-3 py-1 rounded text-xs font-medium text-white transition-colors" style={{ background: "#2a7d5f" }}>
+                  <Check size={14} /> Auto-Crop
+                </button>
+              </>
+            )}
             <button type="button" onClick={onClose} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-400 hover:text-white transition-colors">
               <X size={14} />
             </button>
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left Toolbar */}
-          <div className="flex flex-col gap-1 p-2 overflow-y-auto" style={{ background: "#0f1a2e", width: "90px", borderRight: "1px solid #2a3a5e" }}>
-            <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Tools</p>
-            {TOOLS.map(t => (
-              <button
-                type="button"
-                key={t.id}
-                onClick={() => setTool(t.id)}
-                title={t.label}
-                className="flex flex-col items-center justify-center gap-0.5 rounded py-1.5 text-[10px] transition-all"
-                style={{
-                  background: tool === t.id ? "#2a7d5f" : "transparent",
-                  color: tool === t.id ? "#fff" : "#9ca3af",
-                  border: tool === t.id ? "1px solid #3aae88" : "1px solid transparent",
-                }}
-              >
-                {t.icon}
-                <span style={{ fontSize: "9px", lineHeight: 1.2, textAlign: "center" }}>{t.label}</span>
-              </button>
-            ))}
-
-            <div className="mt-3">
-              <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Color</p>
-              <div className="flex flex-wrap gap-1 justify-center">
-                {COLORS.map(c => (
-                  <button
-                    type="button"
-                    key={c}
-                    onClick={() => setColor(c)}
-                    className="rounded-full transition-transform hover:scale-125"
-                    style={{
-                      width: 16, height: 16, background: c,
-                      outline: color === c ? "2px solid #fff" : "2px solid transparent",
-                      outlineOffset: "1px",
-                    }}
-                  />
-                ))}
+        <div className="flex flex-1 overflow-hidden min-h-[480px]">
+          {previewCrop ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#0f172a]">
+              <div className="text-white text-lg font-medium mb-2">Preview Cropped Diagram</div>
+              <div className="text-gray-400 text-sm mb-6">The empty space around your diagram has been removed.</div>
+              <div className="bg-[#e8ecf0] p-6 rounded-lg overflow-auto shadow-lg flex items-center justify-center max-w-full" style={{ maxHeight: "calc(100% - 150px)" }}>
+                <img src={previewCrop} alt="Cropped Preview" className="shadow-md rounded border border-gray-300 bg-white max-w-full" style={{ maxHeight: "100%", objectFit: "contain" }} />
+              </div>
+              <div className="flex gap-4 mt-8">
+                <button type="button" onClick={() => setPreviewCrop(null)} className="px-6 py-2 rounded font-medium text-white transition-colors hover:bg-opacity-80" style={{ background: "#475569" }}>
+                  Back to Edit
+                </button>
+                <button type="button" onClick={() => onSave(previewCrop)} className="flex items-center gap-2 px-6 py-2 rounded font-medium text-white transition-colors hover:bg-opacity-80" style={{ background: "#2a7d5f" }}>
+                  <Check size={18} /> Confirm Insert
+                </button>
               </div>
             </div>
-
-            <div className="mt-3">
-              <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Size</p>
-              <div className="flex flex-col gap-1 items-center">
-                {SIZES.map(s => (
+          ) : (
+            <>
+              {/* Left Toolbar */}
+              <div className="flex flex-col gap-1 p-2 overflow-y-auto shrink-0" style={{ background: "#0f1a2e", width: "90px", borderRight: "1px solid #2a3a5e" }}>
+                <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Tools</p>
+                {TOOLS.map(t => (
                   <button
                     type="button"
-                    key={s}
-                    onClick={() => setLineWidth(s)}
-                    className="flex items-center justify-center rounded transition-colors w-12 h-6"
+                    key={t.id}
+                    onClick={() => setTool(t.id)}
+                    title={t.label}
+                    className="flex flex-col items-center justify-center gap-0.5 rounded py-1.5 text-[10px] transition-all"
                     style={{
-                      background: lineWidth === s ? "#1e3a5f" : "transparent",
-                      border: lineWidth === s ? "1px solid #3b82f6" : "1px solid transparent",
+                      background: tool === t.id ? "#2a7d5f" : "transparent",
+                      color: tool === t.id ? "#fff" : "#9ca3af",
+                      border: tool === t.id ? "1px solid #3aae88" : "1px solid transparent",
                     }}
                   >
-                    <div className="rounded-full bg-gray-300" style={{ width: `${Math.min(s * 5, 40)}px`, height: `${s}px` }} />
+                    {t.icon}
+                    <span style={{ fontSize: "9px", lineHeight: 1.2, textAlign: "center" }}>{t.label}</span>
                   </button>
                 ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Canvas */}
-          <div className="flex-1 overflow-auto flex items-center justify-center p-2" style={{ background: "#e8ecf0" }}>
-            <canvas
-              ref={canvasRef}
-              width={700}
-              height={480}
-              style={{ cursor: tool === "eraser" ? "cell" : "crosshair", border: "1px solid #cbd5e1", borderRadius: 4, background: "#fff", maxWidth: "100%", touchAction: "none" }}
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={() => setIsDrawing(false)}
-            />
-          </div>
+                <div className="mt-3">
+                  <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Color</p>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {COLORS.map(c => (
+                      <button
+                        type="button"
+                        key={c}
+                        onClick={() => setColor(c)}
+                        className="rounded-full transition-transform hover:scale-125"
+                        style={{
+                          width: 16, height: 16, background: c,
+                          outline: color === c ? "2px solid #fff" : "2px solid transparent",
+                          outlineOffset: "1px",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-1 text-center">Size</p>
+                  <div className="flex flex-col gap-1 items-center">
+                    {SIZES.map(s => (
+                      <button
+                        type="button"
+                        key={s}
+                        onClick={() => setLineWidth(s)}
+                        className="flex items-center justify-center rounded transition-colors w-12 h-6"
+                        style={{
+                          background: lineWidth === s ? "#1e3a5f" : "transparent",
+                          border: lineWidth === s ? "1px solid #3b82f6" : "1px solid transparent",
+                        }}
+                      >
+                        <div className="rounded-full bg-gray-300" style={{ width: `${Math.min(s * 5, 40)}px`, height: `${s}px` }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Canvas */}
+              <div className="flex-1 overflow-auto flex items-center justify-center p-2" style={{ background: "#e8ecf0" }}>
+                <canvas
+                  ref={canvasRef}
+                  width={700}
+                  height={480}
+                  style={{ cursor: tool === "eraser" ? "cell" : "crosshair", border: "1px solid #cbd5e1", borderRadius: 4, background: "#fff", maxWidth: "100%", touchAction: "none" }}
+                  onMouseDown={onMouseDown}
+                  onMouseMove={onMouseMove}
+                  onMouseUp={onMouseUp}
+                  onMouseLeave={() => setIsDrawing(false)}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Status bar */}
-        <div className="px-4 py-1.5 text-[10px] text-gray-500" style={{ background: "#0a1020", borderTop: "1px solid #2a3a5e" }}>
-          Active: <span className="text-blue-400 font-medium">{TOOLS.find(t => t.id === tool)?.label}</span>
-          &nbsp;·&nbsp; Click &amp; drag to draw shapes &nbsp;·&nbsp; Hold shift for proportional shapes
-        </div>
+        {!previewCrop && (
+          <div className="px-4 py-1.5 text-[10px] text-gray-500" style={{ background: "#0a1020", borderTop: "1px solid #2a3a5e" }}>
+            Active: <span className="text-blue-400 font-medium">{TOOLS.find(t => t.id === tool)?.label}</span>
+            &nbsp;·&nbsp; Click &amp; drag to draw shapes &nbsp;·&nbsp; Hold shift for proportional shapes
+          </div>
+        )}
       </div>
     </div>
   );
