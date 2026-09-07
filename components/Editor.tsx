@@ -56,12 +56,13 @@ const initialPaperData: PaperData = {
     },
   ],
   settings: {
-    marginTop: 15,
-    marginBottom: 15,
-    marginLeft: 15,
-    marginRight: 15,
-    fontSize: 12,
-    lineHeight: 1.5,
+    marginTop: 10,
+    marginBottom: 10,
+    marginLeft: 10,
+    marginRight: 10,
+    fontSize: 16,
+    headerFontSize: 14,
+    lineHeight: 1,
   }
 };
 
@@ -676,6 +677,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
       setActiveSectionId(startData.sections[0].id);
     }
   }, [initialPaperId, startData]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [showPageSetup, setShowPageSetup] = useState(false);
   const [showSectionModal, setShowSectionModal] = useState(false);
@@ -714,6 +716,26 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
       }
     }
     fetchSyllabus();
+
+    async function checkAdmin() {
+      try {
+        const client = createClient();
+        const { data: { user } } = await client.auth.getUser();
+        if (user?.email) {
+          const { data: userData } = await client
+            .from('users')
+            .select('status')
+            .eq('email', user.email)
+            .single();
+          if (userData?.status === 'admin' || userData?.status === 'superadmin') {
+            setIsAdmin(true);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check admin status:', err);
+      }
+    }
+    checkAdmin();
   }, []);
 
   const selectedSemNum = useMemo(() => {
@@ -1806,32 +1828,34 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
 
             </div>
 
-            <div style={{ borderTop: '1px solid #e2e5ea', paddingTop: '16px' }}>
-              <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#9ca3af' }}>Layout Settings</h4>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Line Spacing</label>
-                  <input type="number" min="1.0" max="3.0" step="0.1" value={paperData.settings?.lineHeight || 1.5} onChange={(e) => updateSettings('lineHeight', parseFloat(e.target.value))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Q. Font (pt)</label>
-                  <input type="number" min="8" max="24" value={paperData.settings?.fontSize || 12} onChange={(e) => updateSettings('fontSize', parseInt(e.target.value) || 12)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Head Font (pt)</label>
-                  <input type="number" min="8" max="24" value={paperData.settings?.headerFontSize || 12} onChange={(e) => updateSettings('headerFontSize', parseInt(e.target.value) || 12)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                </div>
-                <div className="col-span-3">
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Margins (mm)</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    <input title="Top" type="number" placeholder="Top" value={paperData.settings?.marginTop ?? ''} onChange={(e) => updateSettings('marginTop', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                    <input title="Bottom" type="number" placeholder="Bottom" value={paperData.settings?.marginBottom ?? ''} onChange={(e) => updateSettings('marginBottom', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                    <input title="Left" type="number" placeholder="Left" value={paperData.settings?.marginLeft ?? ''} onChange={(e) => updateSettings('marginLeft', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
-                    <input title="Right" type="number" placeholder="Right" value={paperData.settings?.marginRight ?? ''} onChange={(e) => updateSettings('marginRight', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+            {isAdmin && (
+              <div style={{ borderTop: '1px solid #e2e5ea', paddingTop: '16px' }}>
+                <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#9ca3af' }}>Layout Settings</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Line Spacing</label>
+                    <input type="number" min="1.0" max="3.0" step="0.1" value={paperData.settings?.lineHeight || 1} onChange={(e) => updateSettings('lineHeight', parseFloat(e.target.value))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Q. Font (pt)</label>
+                    <input type="number" min="8" max="24" value={paperData.settings?.fontSize || 16} onChange={(e) => updateSettings('fontSize', parseInt(e.target.value) || 16)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Head Font (pt)</label>
+                    <input type="number" min="8" max="24" value={paperData.settings?.headerFontSize || 14} onChange={(e) => updateSettings('headerFontSize', parseInt(e.target.value) || 14)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                  </div>
+                  <div className="col-span-3">
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Margins (mm)</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      <input title="Top" type="number" placeholder="Top" value={paperData.settings?.marginTop ?? ''} onChange={(e) => updateSettings('marginTop', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                      <input title="Bottom" type="number" placeholder="Bottom" value={paperData.settings?.marginBottom ?? ''} onChange={(e) => updateSettings('marginBottom', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                      <input title="Left" type="number" placeholder="Left" value={paperData.settings?.marginLeft ?? ''} onChange={(e) => updateSettings('marginLeft', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                      <input title="Right" type="number" placeholder="Right" value={paperData.settings?.marginRight ?? ''} onChange={(e) => updateSettings('marginRight', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="pt-3 flex justify-between items-center" style={{ borderTop: '1px solid #e2e5ea' }}>
               <button onClick={resetSettings} className="text-xs flex items-center gap-1 transition-colors" style={{ color: '#6b7280' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#374151')} onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}>

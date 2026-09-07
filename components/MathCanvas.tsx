@@ -9,7 +9,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import {
   Minus, Circle, Square, Triangle, Move, Pen, Eraser,
   Undo2, Trash2, Download, Check, X, ArrowRight,
-  Grid3X3, CornerDownRight
+  Grid3X3, CornerDownRight, Upload
 } from "lucide-react";
 
 type Tool =
@@ -54,6 +54,7 @@ const SIZES  = [1, 2, 3, 5, 8];
 
 export default function MathCanvas({ initialData, onSave, onClose }: MathCanvasProps) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [tool, setTool]       = useState<Tool>("freehand");
   const [color, setColor]     = useState("#000000");
   const [lineWidth, setLineWidth] = useState(2);
@@ -317,6 +318,38 @@ export default function MathCanvas({ initialData, onSave, onClose }: MathCanvasP
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (!canvas || !ctx) return;
+
+        snapshot();
+
+        let { width, height } = img;
+        if (width > canvas.width || height > canvas.height) {
+          const ratio = Math.min(canvas.width / width, canvas.height / height);
+          width *= ratio;
+          height *= ratio;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        handleSave();
+      };
+      if (typeof event.target?.result === 'string') {
+        img.src = event.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleSave = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -386,6 +419,16 @@ export default function MathCanvas({ initialData, onSave, onClose }: MathCanvasP
                 </button>
                 <button type="button" onClick={clearCanvas} title="Clear" className="flex items-center gap-1 px-2 py-1 rounded text-xs text-red-400 hover:text-red-300 transition-colors">
                   <Trash2 size={14} /> Clear
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleImageUpload}
+                />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1 px-3 py-1 rounded text-xs font-medium text-white transition-colors bg-blue-600 hover:bg-blue-500">
+                  <Upload size={14} /> Upload Image
                 </button>
                 <button type="button" onClick={handleSave} className="flex items-center gap-1 px-3 py-1 rounded text-xs font-medium text-white transition-colors" style={{ background: "#2a7d5f" }}>
                   <Check size={14} /> Auto-Crop

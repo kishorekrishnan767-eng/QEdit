@@ -52,7 +52,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
     // Header
     nodes.push(
-      <div key="header" className="relative" style={{ marginBottom: '1em', fontSize: `${data.settings?.headerFontSize ?? 12}pt`, lineHeight: 1.5 }}>
+      <div key="header" className="relative" style={{ marginBottom: '0.5em', fontSize: `${data.settings?.headerFontSize ?? 14}pt` }}>
         {showLogo && data.header.logo && (
           <img src={data.header.logo} alt="Logo" style={{ position: 'absolute', top: 0, left: 0, width: `${logoSize}px`, height: `${logoSize}px`, objectFit: 'contain', filter: 'grayscale(100%)' }} />
         )}
@@ -61,7 +61,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           {data.header.college && <h2 className="font-bold uppercase leading-tight">{data.header.college}</h2>}
           {data.header.department && <h2 className="font-bold uppercase leading-tight">{data.header.department}</h2>}
           <h2 className="font-bold uppercase leading-tight">{data.header.examName}</h2>
-          <h3 className="font-bold uppercase leading-tight" style={{ marginBottom: '1.5em' }}>
+          <h3 className="font-bold uppercase leading-tight" style={{ marginBottom: '0.5em' }}>
             {data.header.courseCode && <span>{data.header.courseCode} – </span>}
             {data.header.subject}
           </h3>
@@ -101,8 +101,8 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
     data.sections.forEach((section) => {
       nodes.push(
-        <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.25em', fontSize: `${data.settings?.headerFontSize ?? 12}pt`, lineHeight: 1.5 }}>
-          <div className="flex justify-between items-end border-b border-black" style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
+        <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.25em', fontSize: `${data.settings?.headerFontSize ?? 14}pt` }}>
+          <div className="flex justify-between items-end" style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
             <div className="flex items-baseline" style={{ gap: '0.5em' }}>
               <h4 className="font-bold uppercase whitespace-nowrap">Part {section.part}</h4>
               <span className="font-bold">
@@ -118,9 +118,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           {showBlCoPo && (
             <div className="flex font-bold text-right" style={{ fontSize: '0.85em' }}>
               <div className="flex-1 text-left"></div>
-              <div style={{ width: '2em', textAlign: 'center' }}>BL</div>
-              <div style={{ width: '2em', textAlign: 'center' }}>CO</div>
-              <div style={{ width: '2em', textAlign: 'center' }}>PO</div>
+              <div style={{ width: '32px', textAlign: 'center' }}>BL</div>
+              <div style={{ width: '32px', textAlign: 'center' }}>CO</div>
+              <div style={{ width: '32px', textAlign: 'center' }}>PO</div>
             </div>
           )}
         </div>
@@ -145,9 +145,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                   </div>
                   {showBlCoPo && (
                     <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.bl || '1'}</span>
-                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.co}</span>
-                      <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.po}</span>
+                      <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.bl || '1'}</span>
+                      <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.co}</span>
+                      <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.po}</span>
                     </div>
                   )}
                 </div>
@@ -166,9 +166,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                         </div>
                         {showBlCoPo && (
                           <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
-                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.co}</span>
-                            <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.po}</span>
+                            <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
+                            <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.co}</span>
+                            <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.po}</span>
                           </div>
                         )}
                       </div>
@@ -185,9 +185,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                       </p>
                       {showBlCoPo && (
                         <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.bl || '1'}</span>
-                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.co}</span>
-                          <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{question.orQuestion.po}</span>
+                          <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.orQuestion.bl || '1'}</span>
+                          <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.orQuestion.co}</span>
+                          <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{question.orQuestion.po}</span>
                         </div>
                       )}
                     </div>
@@ -206,9 +206,9 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
                             </div>
                             {showBlCoPo && (
                               <div className="flex gap-0 shrink-0 font-mono font-bold" style={{ fontSize: '0.85em' }}>
-                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
-                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.co}</span>
-                                <span style={{ width: '2em', textAlign: 'center', display: 'block' }}>{sub.po}</span>
+                                <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.bl || '1'}</span>
+                                <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.co}</span>
+                                <span style={{ width: '32px', textAlign: 'center', display: 'block' }}>{sub.po}</span>
                               </div>
                             )}
                           </div>
@@ -253,12 +253,12 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
     return { contentNodes: nodes, breakBefore: breaks };
   }, [data, showBlCoPo, showLogo, logoSize, showDate]);
 
-  const fontSize     = data.settings?.fontSize     ?? 12;
-  const lineHeight   = data.settings?.lineHeight   ?? 1.5;
-  const marginTop    = data.settings?.marginTop    ?? 15;
-  const marginBottom = data.settings?.marginBottom ?? 15;
-  const marginLeft   = data.settings?.marginLeft   ?? 15;
-  const marginRight  = data.settings?.marginRight  ?? 15;
+  const fontSize     = data.settings?.fontSize     ?? 16;
+  const lineHeight   = data.settings?.lineHeight   ?? 1;
+  const marginTop    = data.settings?.marginTop    ?? 10;
+  const marginBottom = data.settings?.marginBottom ?? 10;
+  const marginLeft   = data.settings?.marginLeft   ?? 10;
+  const marginRight  = data.settings?.marginRight  ?? 10;
 
   useEffect(() => {
     if (contentNodes.length === 0) return;

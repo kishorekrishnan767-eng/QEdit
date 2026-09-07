@@ -30,6 +30,7 @@ interface SpellCheckedTextareaProps {
   style?: CSSProperties;
   as?: "textarea" | "input";
   disabled?: boolean;
+  showToolbar?: boolean;
 }
 
 // ── HTML builder ─────────────────────────────────────────────────────────────
@@ -72,6 +73,7 @@ export default function SpellCheckedTextarea({
   style = {},
   as = "textarea",
   disabled,
+  showToolbar = true,
 }: SpellCheckedTextareaProps) {
   const [errors, setErrors] = useState<SpellError[]>([]);
   const [popover, setPopover] = useState<Popover | null>(null);
@@ -158,6 +160,32 @@ export default function SpellCheckedTextarea({
     setPopover({ errIdx, x: Math.max(0, approxX), y: approxY });
   }, [errors, as, value]);
 
+  // ── Apply formatting (Bold, Italic, etc.) ───────────────────────────────
+  const applyFormat = useCallback((tag: string) => {
+    const el = as === "textarea" ? textareaRef.current : inputRef.current;
+    if (!el) return;
+
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    
+    const selectedText = value.substring(start, end);
+    const before = value.substring(0, start);
+    const after = value.substring(end);
+
+    const openTag = `<${tag}>`;
+    const closeTag = `</${tag}>`;
+    
+    const newText = before + openTag + selectedText + closeTag + after;
+    
+    onChange(newText);
+    
+    setTimeout(() => {
+      el.focus();
+      const newCursorPos = selectedText ? start + openTag.length + selectedText.length + closeTag.length : start + openTag.length;
+      el.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  }, [as, value, onChange]);
+
   // ── Apply suggestion ──────────────────────────────────────────────────────
   const applySuggestion = useCallback(
     (suggestion: string) => {
@@ -200,7 +228,18 @@ export default function SpellCheckedTextarea({
   const htmlContent = buildHighlightedHTML(value, errors);
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative" }}>
+    <div className="flex flex-col w-full">
+      {showToolbar && as === "textarea" && (
+        <div className="flex items-center gap-1 p-1 bg-[#f8f9fb] border border-b-0 rounded-t-md" style={{ borderColor: '#d1d5db' }}>
+          <button type="button" onClick={() => applyFormat('b')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 font-bold transition-colors" title="Bold">B</button>
+          <button type="button" onClick={() => applyFormat('i')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 italic font-serif transition-colors" title="Italic">I</button>
+          <button type="button" onClick={() => applyFormat('u')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 underline transition-colors" title="Underline">U</button>
+          <div className="w-px h-4 bg-[#d1d5db] mx-1"></div>
+          <button type="button" onClick={() => applyFormat('sub')} className="p-1 hover:bg-[#e2e5ea] rounded text-xs w-7 h-7 transition-colors" title="Subscript">X<sub className="text-[10px]">2</sub></button>
+          <button type="button" onClick={() => applyFormat('sup')} className="p-1 hover:bg-[#e2e5ea] rounded text-xs w-7 h-7 transition-colors" title="Superscript">X<sup className="text-[10px]">2</sup></button>
+        </div>
+      )}
+      <div ref={wrapperRef} style={{ position: "relative", ...(showToolbar && as === "textarea" ? { marginTop: '-1px' } : {}) }}>
       {/* ── Mirror layer (behind field, renders underlines) ── */}
       <div
         aria-hidden="true"
@@ -346,6 +385,7 @@ export default function SpellCheckedTextarea({
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, UserPlus, Trash2, Copy, Link, Check, Eye, Pencil, Bell, CheckCircle, XCircle } from 'lucide-react';
 import { addCollaborator, removeCollaborator, getCollaborators, updateCollaboratorPermission } from '@/lib/supabase/collaborations';
 import { getPendingRequests, approveRequest, denyRequest } from '@/lib/supabase/access-requests';
@@ -25,13 +25,7 @@ export default function ShareModal({ isOpen, onClose, paperId, paperTitle, isOwn
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && paperId) {
-      loadData();
-    }
-  }, [isOpen, paperId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     const [collabData, requestData] = await Promise.all([
       getCollaborators(paperId),
@@ -40,7 +34,13 @@ export default function ShareModal({ isOpen, onClose, paperId, paperTitle, isOwn
     setCollaborators(collabData);
     setPendingRequests(requestData);
     setLoading(false);
-  };
+  }, [paperId, isOwner]);
+
+  useEffect(() => {
+    if (isOpen && paperId) {
+      loadData();
+    }
+  }, [isOpen, paperId, loadData]);
 
   const handleAdd = async () => {
     if (!email.trim() || !isOwner) return;
