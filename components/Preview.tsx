@@ -102,7 +102,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
     data.sections.forEach((section) => {
       nodes.push(
         <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.25em', fontSize: `${data.settings?.headerFontSize ?? 14}pt` }}>
-          <div className="flex justify-between items-end" style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
+          <div className={`flex justify-between items-end ${section.part.toLowerCase() === 'b' ? '' : 'border-b border-black'}`} style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
             <div className="flex items-baseline" style={{ gap: '0.5em' }}>
               <h4 className="font-bold uppercase whitespace-nowrap">Part {section.part}</h4>
               <span className="font-bold">
