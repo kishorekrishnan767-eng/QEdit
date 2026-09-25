@@ -1,6 +1,12 @@
 "use client";
 
-import { useRef, useEffect, useCallback, CSSProperties } from "react";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import Underline from '@tiptap/extension-underline';
+import Placeholder from '@tiptap/extension-placeholder';
+import { useEffect, CSSProperties } from 'react';
 
 interface SpellCheckedTextareaProps {
   value: string;
@@ -27,36 +33,61 @@ export default function SpellCheckedTextarea({
   disabled,
   showToolbar = true,
 }: SpellCheckedTextareaProps) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync value from props to contentEditable (only if changed externally)
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        blockquote: false,
+        codeBlock: false,
+        horizontalRule: false,
+        dropcursor: false,
+        gapcursor: false,
+      }),
+      Underline,
+      Subscript,
+      Superscript,
+      Placeholder.configure({
+        placeholder: placeholder || 'Type here...',
+      }),
+    ],
+    content: value,
+    editable: !disabled,
+    onUpdate: ({ editor }) => {
+      let html = editor.getHTML();
+      if (html === '<p></p>') html = '';
+      else {
+        html = html.replace(/<\/p>\s*<p>/g, '<br/>').replace(/^<p>/, '').replace(/<\/p>$/, '');
+      }
+      onChange(html);
+    },
+    onBlur: () => {
+      if (onBlur) onBlur();
+    }
+  });
+
+  // Sync external value changes to the editor (e.g., auto-capitalize)
   useEffect(() => {
-    if (as === "textarea" && editorRef.current) {
-      if (editorRef.current.innerHTML !== value) {
-        editorRef.current.innerHTML = value;
+    if (editor && value !== undefined) {
+      let currentHtml = editor.getHTML();
+      if (currentHtml === '<p></p>') currentHtml = '';
+      else if (currentHtml) {
+        currentHtml = currentHtml.replace(/<\/p>\s*<p>/g, '<br/>').replace(/^<p>/, '').replace(/<\/p>$/, '');
+      }
+      if (currentHtml !== value && value !== '') {
+        const { from, to } = editor.state.selection;
+        editor.commands.setContent(value, { emitUpdate: false, parseOptions: { preserveWhitespace: "full" } });
+        editor.commands.setTextSelection({ from, to });
       }
     }
-  }, [value, as]);
-
-  const handleInput = useCallback(() => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  }, [onChange]);
-
-  const applyFormat = useCallback((cmd: string) => {
-    document.execCommand(cmd, false, null);
-    if (editorRef.current) {
-      editorRef.current.focus();
-      handleInput();
-    }
-  }, [handleInput]);
+  }, [value, editor]);
 
   if (as === "input") {
     return (
       <input
-        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -71,44 +102,70 @@ export default function SpellCheckedTextarea({
   }
 
   return (
-    <div className="flex flex-col w-full">
+    <div className={`w-full custom-tiptap-editor ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       <style>{`
-        div[contenteditable]:empty:before {
+        .custom-tiptap-editor .ProseMirror {
+          min-height: ${rows * 1.5}em;
+          padding: ${style.padding ?? '0.5rem'};
+          border: 1px solid #d1d5db;
+          border-top: ${showToolbar ? 'none' : '1px solid #d1d5db'};
+          border-radius: ${showToolbar ? '0 0 0.375rem 0.375rem' : '0.375rem'};
+          font-family: inherit;
+          font-size: ${style.fontSize ?? '0.875rem'};
+          background: transparent;
+          outline: none;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+        .custom-tiptap-editor .ProseMirror p {
+          margin: 0;
+        }
+        .custom-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
+          float: left;
           color: #9ca3af;
           pointer-events: none;
-          display: block;
+          height: 0;
         }
       `}</style>
       
-      {showToolbar && (
+      {showToolbar && editor && (
         <div className="flex items-center gap-1 p-1 bg-[#f8f9fb] border border-b-0 rounded-t-md" style={{ borderColor: '#d1d5db' }}>
-          <button type="button" onClick={() => applyFormat('bold')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 font-bold transition-colors" title="Bold">B</button>
-          <button type="button" onClick={() => applyFormat('italic')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 italic font-serif transition-colors" title="Italic">I</button>
-          <button type="button" onClick={() => applyFormat('underline')} className="p-1 hover:bg-[#e2e5ea] rounded text-sm w-7 h-7 underline transition-colors" title="Underline">U</button>
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().toggleBold().run()} 
+            className={`p-1 rounded text-sm w-7 h-7 font-bold transition-colors ${editor.isActive('bold') ? 'bg-[#d1d5db]' : 'hover:bg-[#e2e5ea]'}`} 
+            title="Bold"
+          >B</button>
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().toggleItalic().run()} 
+            className={`p-1 rounded text-sm w-7 h-7 italic font-serif transition-colors ${editor.isActive('italic') ? 'bg-[#d1d5db]' : 'hover:bg-[#e2e5ea]'}`} 
+            title="Italic"
+          >I</button>
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().toggleUnderline().run()} 
+            className={`p-1 rounded text-sm w-7 h-7 underline transition-colors ${editor.isActive('underline') ? 'bg-[#d1d5db]' : 'hover:bg-[#e2e5ea]'}`} 
+            title="Underline"
+          >U</button>
           <div className="w-px h-4 bg-[#d1d5db] mx-1"></div>
-          <button type="button" onClick={() => applyFormat('subscript')} className="p-1 hover:bg-[#e2e5ea] rounded text-xs w-7 h-7 transition-colors" title="Subscript">X<sub className="text-[10px]">2</sub></button>
-          <button type="button" onClick={() => applyFormat('superscript')} className="p-1 hover:bg-[#e2e5ea] rounded text-xs w-7 h-7 transition-colors" title="Superscript">X<sup className="text-[10px]">2</sup></button>
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().toggleSubscript().run()} 
+            className={`p-1 rounded text-xs w-7 h-7 transition-colors ${editor.isActive('subscript') ? 'bg-[#d1d5db]' : 'hover:bg-[#e2e5ea]'}`} 
+            title="Subscript"
+          >X<sub className="text-[10px]">2</sub></button>
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().toggleSuperscript().run()} 
+            className={`p-1 rounded text-xs w-7 h-7 transition-colors ${editor.isActive('superscript') ? 'bg-[#d1d5db]' : 'hover:bg-[#e2e5ea]'}`} 
+            title="Superscript"
+          >X<sup className="text-[10px]">2</sup></button>
         </div>
       )}
-      <div
-        ref={editorRef}
-        contentEditable={!disabled}
-        onInput={handleInput}
-        onBlur={onBlur}
-        className={className}
-        style={{
-          ...style,
-          minHeight: `${rows * 1.5}em`,
-          outline: "none",
-          cursor: disabled ? "not-allowed" : "text",
-          whiteSpace: "pre-wrap",
-          overflowWrap: "break-word",
-          ...(showToolbar ? { marginTop: '-1px', borderTopLeftRadius: 0, borderTopRightRadius: 0 } : {})
-        }}
-        spellCheck={true}
-        data-placeholder={placeholder}
-      />
+      
+      <EditorContent editor={editor} spellCheck={true} />
     </div>
   );
 }

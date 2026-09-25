@@ -4,7 +4,15 @@ import katex from "katex";
 
 const renderMathText = (text: string) => {
   if (!text) return null;
-  let html = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+  
+  // Clean up legacy paragraph tags to prevent block rendering issues and stray punctuation
+  let html = text.replace(/<\/p>\s*<p[^>]*>/gi, '<br/><br/>');
+  html = html.replace(/<\/?p[^>]*>/gi, '');
+  
+  // Clean up any accidental leading spaces/nbsps that cause huge gaps
+  html = html.replace(/^(?:&nbsp;|\s)+/gi, '');
+
+  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
     try {
       return katex.renderToString(math, { displayMode: true, throwOnError: false });
     } catch (e) {
@@ -101,8 +109,8 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
     data.sections.forEach((section) => {
       nodes.push(
-        <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.25em', fontSize: `${data.settings?.headerFontSize ?? 14}pt` }}>
-          <div className={`flex justify-between items-end ${section.part.toLowerCase() === 'b' ? '' : 'border-b border-black'}`} style={{ marginBottom: '0.25em', marginTop: '0.5em', paddingBottom: '0.25em', gap: '0.5em' }}>
+        <div key={`sec-${section.id}-header`} style={{ marginBottom: '0.15em', fontSize: `${data.settings?.headerFontSize ?? 14}pt` }}>
+          <div className="flex justify-between items-end" style={{ marginBottom: '0.15em', marginTop: '0.25em', gap: '0.5em' }}>
             <div className="flex items-baseline" style={{ gap: '0.5em' }}>
               <h4 className="font-bold uppercase whitespace-nowrap">Part {section.part}</h4>
               <span className="font-bold">
@@ -133,8 +141,8 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
           globalQIndex++;
           const qNum = globalQIndex;
           nodes.push(
-            <div key={question.id} className="flex break-inside-avoid" style={{ gap: '0.5em', marginBottom: '0.75em' }}>
-              <span className="shrink-0 font-normal" style={{ width: '1.5em' }}>{qNum}.</span>
+            <div key={question.id} className="flex break-inside-avoid" style={{ gap: '0.25em', marginBottom: '0.75em' }}>
+              <span className="shrink-0 font-normal" style={{ width: '1.25em' }}>{qNum}.</span>
               <div className="flex-1">
                 <div className="flex justify-between items-baseline">
                   <div className="text-justify flex-1" style={{ paddingRight: '1em' }}>
@@ -255,6 +263,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
 
   const fontSize     = data.settings?.fontSize     ?? 16;
   const lineHeight   = data.settings?.lineHeight   ?? 1;
+  const letterSpacing = data.settings?.letterSpacing ?? 0;
   const marginTop    = data.settings?.marginTop    ?? 10;
   const marginBottom = data.settings?.marginBottom ?? 10;
   const marginLeft   = data.settings?.marginLeft   ?? 10;
@@ -333,6 +342,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
     boxSizing:     'border-box',
     fontSize:      `${fontSize}pt`,
     lineHeight:     lineHeight,
+    letterSpacing: `${letterSpacing}px`,
     fontFamily:    '"Times New Roman", Times, serif',
     color:         '#000',
     overflow:      'hidden',
@@ -349,6 +359,7 @@ const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ data, showBlCo
     boxSizing:   'border-box',
     fontSize:    `${fontSize}pt`,
     lineHeight:   lineHeight,
+    letterSpacing: `${letterSpacing}px`,
     fontFamily:  '"Times New Roman", Times, serif',
   };
 

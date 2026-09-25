@@ -58,6 +58,7 @@ export interface PageSettings {
     fontSize: number; // pt (for questions)
     headerFontSize?: number; // pt (for headers and section titles)
     lineHeight: number; // Unitless (e.g., 1.5)
+    letterSpacing?: number; // px (e.g., 0.5)
 }
 
 export interface PaperData {

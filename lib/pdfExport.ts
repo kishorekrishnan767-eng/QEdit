@@ -70,6 +70,10 @@ export async function exportToPDF(
     const examName = paperData.header.examName || "";
     const category = detectExamCategory(examName);
     const isCycleTest = category === "cycle_test_1" || category === "cycle_test_2";
+    // Model Exam content that overflows to exactly 2 pages is printed as a single
+    // landscape sheet with page 1 and page 2 side by side, instead of 2 separate
+    // portrait sheets. A single page (or 3+ pages) keeps the normal portrait layout.
+    const isModelExamTwoUp = category === "model_exam" && canvases.length === 2;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let pdf: any;
@@ -106,6 +110,37 @@ export async function exportToPDF(
         const rightX = halfWidth + padding + (slotW - imgW) / 2;
         pdf.addImage(imgDataUrl, "JPEG", rightX, offsetY, imgW, imgH);
       }
+    } else if (isModelExamTwoUp) {
+      // Landscape A4: 297mm x 210mm, page 1 on the left half, page 2 on the right half
+      const pdfWidth = 297;
+      const pdfHeight = 210;
+      pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const halfWidth = pdfWidth / 2;
+      const padding = 3;
+      const slotW = halfWidth - padding * 2;
+      const slotH = pdfHeight - padding * 2;
+
+      canvases.forEach((pageCanvas, i) => {
+        const aspect = pageCanvas.height / pageCanvas.width;
+        let imgW = slotW;
+        let imgH = imgW * aspect;
+        if (imgH > slotH) {
+          imgH = slotH;
+          imgW = imgH / aspect;
+        }
+        const offsetY = padding + (slotH - imgH) / 2;
+        const slotX = i === 0 ? 0 : halfWidth;
+        const x = slotX + padding + (slotW - imgW) / 2;
+
+        pdf.addImage(
+          pageCanvas.toDataURL("image/jpeg", 0.95),
+          "JPEG",
+          x,
+          offsetY,
+          imgW,
+          imgH
+        );
+      });
     } else {
       // Portrait A4: 210mm x 297mm (Standard vertical format for Model Exams)
       pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });

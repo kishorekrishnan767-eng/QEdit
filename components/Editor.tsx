@@ -797,10 +797,37 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
     });
   }, [selectedSemNum, selectedCourse, selectedSpec, coursesList, selectedRegulation, showElectiveOnly, showMultiOnly]);
 
+  const [customCourseEntry, setCustomCourseEntry] = useState(false);
+  const [courseVal, setCourseVal] = useState('');
+  const [specVal, setSpecVal] = useState('');
+
   useEffect(() => {
     setManualCourseEntry(false);
     setCustomSpecEntry(false);
+    setCustomCourseEntry(false);
   }, [selectedSemNum, selectedCourse]);
+
+  useEffect(() => {
+    const c = paperData.header.class || '';
+    const parts = c.split(' ').filter(Boolean);
+    let y = '';
+    let crs = '';
+    let spc = '';
+    const firstToken = parts[0] || '';
+    if (/^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken)) {
+      y = firstToken;
+      crs = parts[1] || '';
+      spc = parts.slice(2).join(' ');
+    } else {
+      crs = parts[0] || '';
+      spc = parts.slice(1).join(' ');
+    }
+    const reconstructed = [y, courseVal, specVal].filter(Boolean).join(' ');
+    if (reconstructed !== c) {
+      setCourseVal(crs);
+      setSpecVal(spc);
+    }
+  }, [paperData.header.class]);
 
   const [logoSize, setLogoSize] = useState(60);
   const [watermarkSize, setWatermarkSize] = useState(200);
@@ -1337,64 +1364,85 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                 <div className="col-span-2">
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Class</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <select
-                      value={(() => {
-                        const c = paperData.header.class || '';
-                        const parts = c.split(' ').filter(Boolean);
-                        if (parts.length === 0) return '';
-                        const firstToken = parts[0] || '';
-                        const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                        return (isYear ? parts[1] || '' : parts[0]);
-                      })()}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const currentParts = (paperData.header.class || '').split(' ').filter(Boolean);
-                        const firstToken = currentParts[0] || '';
-                        const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                        const year = isYear ? firstToken : '';
-                        const startIdx = isYear ? 2 : 1;
-                        const spec = currentParts.slice(startIdx).join(' ') || '';
-                        
-                        const newClass = [year, val, spec].filter(Boolean).join(' ');
-                        handleHeaderChange('class', newClass);
-                      }}
-                      className="p-2 text-sm rounded-md"
-                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
-                    >
-                      <option value="">Select Course</option>
-                      <option value="BCA">BCA</option>
-                      <option value="BSc">BSc</option>
-                      <option value="BA">BA</option>
-                      <option value="BBA">BBA</option>
-                      <option value="BCom">BCom</option>
-                      <option value="BE">BE</option>
-                      <option value="MCA">MCA</option>
-                      <option value="MSc">MSc</option>
-                    </select>
+                    {!customCourseEntry ? (
+                      <select
+                        value={courseVal}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'custom') {
+                            setCustomCourseEntry(true);
+                          } else {
+                            setCourseVal(val);
+                            const c = paperData.header.class || '';
+                            const parts = c.split(' ').filter(Boolean);
+                            const firstToken = parts[0] || '';
+                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
+                            const newClass = [y, val, specVal].filter(Boolean).join(' ');
+                            handleHeaderChange('class', newClass);
+                          }
+                        }}
+                        className="p-2 text-sm rounded-md"
+                        style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
+                      >
+                        <option value="">Select Course</option>
+                        <option value="BCA">BCA</option>
+                        <option value="BSc">BSc</option>
+                        <option value="BA">BA</option>
+                        <option value="BBA">BBA</option>
+                        <option value="BCom">BCom</option>
+                        <option value="BE">BE</option>
+                        <option value="MCA">MCA</option>
+                        <option value="MSc">MSc</option>
+                        <option value="custom">Custom...</option>
+                      </select>
+                    ) : (
+                      <div className="relative flex items-center w-full">
+                        <input
+                          type="text"
+                          value={courseVal}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCourseVal(val);
+                            const c = paperData.header.class || '';
+                            const parts = c.split(' ').filter(Boolean);
+                            const firstToken = parts[0] || '';
+                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
+                            const newClass = [y, val, specVal].filter(Boolean).join(' ');
+                            handleHeaderChange('class', newClass);
+                          }}
+                          placeholder="e.g. BTech"
+                          className="p-2 text-sm rounded-md pr-8 w-full"
+                          style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomCourseEntry(false);
+                            // If they switch back, keep the value or clear? Keep it.
+                            // The select will just show empty if it doesn't match.
+                          }}
+                          className="absolute right-2 text-gray-400 hover:text-gray-600 text-xs"
+                          title="Select from list"
+                        >
+                          📋
+                        </button>
+                      </div>
+                    )}
 
                     {specsList.length > 0 && !customSpecEntry ? (
                       <select
-                        value={(() => {
-                          const c = paperData.header.class || '';
-                          const parts = c.split(' ').filter(Boolean);
-                          if (parts.length === 0) return '';
-                          const firstToken = parts[0] || '';
-                          const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                          const startIdx = isYear ? 2 : 1;
-                          return parts.slice(startIdx).join(' ') || '';
-                        })()}
+                        value={specVal}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === 'custom') {
                             setCustomSpecEntry(true);
                           } else {
-                            const currentParts = (paperData.header.class || '').split(' ').filter(Boolean);
-                            const firstToken = currentParts[0] || '';
-                            const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                            const year = isYear ? firstToken : '';
-                            const course = isYear ? currentParts[1] || '' : currentParts[0] || '';
-                            
-                            const newClass = [year, course, val].filter(Boolean).join(' ');
+                            setSpecVal(val);
+                            const c = paperData.header.class || '';
+                            const parts = c.split(' ').filter(Boolean);
+                            const firstToken = parts[0] || '';
+                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
+                            const newClass = [y, courseVal, val].filter(Boolean).join(' ');
                             handleHeaderChange('class', newClass);
                           }
                         }}
@@ -1411,24 +1459,15 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                       <div className="relative flex items-center w-full">
                         <input
                           type="text"
-                          value={(() => {
-                            const c = paperData.header.class || '';
-                            const parts = c.split(' ').filter(Boolean);
-                            if (parts.length === 0) return '';
-                            const firstToken = parts[0] || '';
-                            const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                            const startIdx = isYear ? 2 : 1;
-                            return parts.slice(startIdx).join(' ') || '';
-                          })()}
+                          value={specVal}
                           onChange={(e) => {
                             const val = e.target.value;
-                            const currentParts = (paperData.header.class || '').split(' ').filter(Boolean);
-                            const firstToken = currentParts[0] || '';
-                            const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                            const year = isYear ? firstToken : '';
-                            const course = isYear ? currentParts[1] || '' : currentParts[0] || '';
-                            
-                            const newClass = [year, course, val].filter(Boolean).join(' ');
+                            setSpecVal(val);
+                            const c = paperData.header.class || '';
+                            const parts = c.split(' ').filter(Boolean);
+                            const firstToken = parts[0] || '';
+                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
+                            const newClass = [y, courseVal, val].filter(Boolean).join(' ');
                             handleHeaderChange('class', newClass);
                           }}
                           placeholder="e.g. DATA SCIENCE"
@@ -1456,16 +1495,8 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                     value={getSelectedSem(paperData.header.semester)}
                     onChange={(e) => {
                       const val = e.target.value;
-                      const currentParts = (paperData.header.class || '').split(' ').filter(Boolean);
-                      if (currentParts.length === 0) return;
-                      const firstToken = currentParts[0] || '';
-                      const isYear = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken);
-                      const course = isYear ? currentParts[1] || '' : currentParts[0] || '';
-                      const startIdx = isYear ? 2 : 1;
-                      const spec = currentParts.slice(startIdx).join(' ') || '';
-
                       if (!val) {
-                        const newClass = [course, spec].filter(Boolean).join(' ');
+                        const newClass = [courseVal, specVal].filter(Boolean).join(' ');
                         setPaperDataWithAutoSave((prev) => ({
                           ...prev,
                           header: {
@@ -1479,7 +1510,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
 
                       const S = parseInt(val);
                       const calculatedYear = getYearFromSem(S);
-                      const newClass = [calculatedYear, course, spec].filter(Boolean).join(' ');
+                      const newClass = [calculatedYear, courseVal, specVal].filter(Boolean).join(' ');
                       const calculatedRomanSem = getRomanSem(S);
                       setPaperDataWithAutoSave((prev) => ({
                         ...prev,
@@ -1770,7 +1801,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                         <div className="flex-1 text-center font-mono text-xs uppercase tracking-widest" style={{ color: '#9ca3af' }}>--- Page Break ---</div>
                       ) : (
                         <span className="truncate flex-1 pt-0.5" style={{ color: '#1a1a2e' }}>
-                          {section.questions.filter((x, idx) => idx < i && x.type !== 'break').length + 1}. {q.text}
+                          {section.questions.filter((x, idx) => idx < i && x.type !== 'break').length + 1}. {q.text.replace(/<[^>]*>?/gm, '')}
                         </span>
                       )}
                       <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
@@ -1831,7 +1862,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
             {isAdmin && (
               <div style={{ borderTop: '1px solid #e2e5ea', paddingTop: '16px' }}>
                 <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#9ca3af' }}>Layout Settings</h4>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Line Spacing</label>
                     <input type="number" min="1.0" max="3.0" step="0.1" value={paperData.settings?.lineHeight || 1} onChange={(e) => updateSettings('lineHeight', parseFloat(e.target.value))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
@@ -1844,7 +1875,11 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                     <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Head Font (pt)</label>
                     <input type="number" min="8" max="24" value={paperData.settings?.headerFontSize || 14} onChange={(e) => updateSettings('headerFontSize', parseInt(e.target.value) || 14)} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
                   </div>
-                  <div className="col-span-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Letter Space (px)</label>
+                    <input type="number" min="-2.0" max="5.0" step="0.1" value={paperData.settings?.letterSpacing || 0} onChange={(e) => updateSettings('letterSpacing', parseFloat(e.target.value))} className="w-full p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
+                  </div>
+                  <div className="col-span-4">
                     <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Margins (mm)</label>
                     <div className="grid grid-cols-4 gap-2">
                       <input title="Top" type="number" placeholder="Top" value={paperData.settings?.marginTop ?? ''} onChange={(e) => updateSettings('marginTop', parseInt(e.target.value) || 0)} className="p-2 text-sm rounded-md" style={{ border: '1px solid #d1d5db', color: '#1a1a2e', background: '#fff' }} />
