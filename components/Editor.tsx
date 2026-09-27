@@ -8,6 +8,7 @@ import Preview from "./Preview";
 import Modal from "./ui/Modal";
 import { Printer, Trash2, Pencil, Settings, RotateCcw, Plus, ChevronDown, ChevronUp, Save, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { fetchAllSyllabusCourses } from "@/lib/supabase/syllabus";
 
 import { detectExamCategory } from "@/lib/examCategory";
 import { exportToPDF } from "@/lib/pdfExport";
@@ -104,7 +105,7 @@ const EXAMS = [
 const UG_COURSES = ["BCA", "BSc", "BA", "BBA", "BCom", "BE"];
 
 // Postgraduate degree codes offered in the Class dropdown.
-const PG_COURSES = ["MCA", "MSc"];
+const PG_COURSES = ["MCA", "MSc", "MA", "MCom", "MS", "MSW"];
 
 // UG Model Examination convention: Part-A (2 marks/question, Short Answer) +
 // Part-B (16 marks/question, Long Answer), 100 total marks, 3 hour duration.
@@ -672,18 +673,6 @@ const COURSES_DATABASE: SyllabusCourse[] = [
   { code: "PIT25P41L", title: "Project Work", sem: 4, course: "MSc", specialization: "INFORMATION TECHNOLOGY" }
 ];
 
-const COURSE_SPECIALIZATIONS: Record<string, string[]> = {
-  BCA: ["CA", "DATA SCIENCE", "GEN AI"],
-  BSC: ["COMPUTER SCIENCE", "CS AI&ML", "CS CYBER SECURITY"],
-  MCA: ["CA", "Generative Artificial Intelligence"],
-  MSC: [
-    "COMPUTER SCIENCE",
-    "APPLIED DATA SCIENCE",
-    "Computer Science with Specialization in Full Stack Development",
-    "INFORMATION TECHNOLOGY"
-  ]
-};
-
 const getYearFromSem = (semNum: number): string => {
   const years = ["", "I", "II", "III", "IV"];
   const yearIdx = Math.ceil(semNum / 2);
@@ -766,13 +755,10 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
   useEffect(() => {
     async function fetchSyllabus() {
       try {
-        const client = createClient();
-        const { data, error } = await client
-          .from('syllabus_courses')
-          .select('code, title, sem, course, specialization, regulation');
-        
+        const { data, error } = await fetchAllSyllabusCourses<SyllabusCourse>('code, title, sem, course, specialization, regulation');
+
         if (error) {
-          console.error('Error fetching syllabus courses from Supabase:', error.message);
+          console.error('Error fetching syllabus courses from Supabase:', error);
           return;
         }
         if (data && data.length > 0) {
@@ -826,10 +812,6 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
     return parts.slice(startIdx).join(' ').trim().toLowerCase();
   }, [paperData.header.class]);
 
-  const specsList = useMemo(() => {
-    return COURSE_SPECIALIZATIONS[selectedCourse.toUpperCase()] || [];
-  }, [selectedCourse]);
-
   const regulationsList = useMemo(() => {
     const regs = Array.from(new Set(coursesList.map(c => c.regulation || '2024')));
     if (!regs.includes('2024')) regs.push('2024');
@@ -839,6 +821,68 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
   const selectedRegulation = useMemo(() => {
     return paperData.header.regulation || '2024';
   }, [paperData.header.regulation]);
+
+  // Class options come straight from the syllabus table (every regulation), so
+  // a class seeded only under a newer regulation (e.g. MA, MCom) still shows up.
+  const courseOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    coursesList.forEach((c) => {
+      const crs = c.course?.trim();
+      if (crs && !seen.has(crs.toLowerCase())) seen.set(crs.toLowerCase(), crs);
+    });
+    return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+  }, [coursesList]);
+
+  // Specializations seeded for the chosen class, preferring the selected regulation.
+  const specsList = useMemo(() => {
+    if (!selectedCourse) return [];
+    const forCourse = coursesList.filter((c) => c.course?.trim().toLowerCase() === selectedCourse);
+    const inRegulation = forCourse.filter((c) => (c.regulation || '2024') === selectedRegulation);
+    const specs: string[] = [];
+    (inRegulation.length > 0 ? inRegulation : forCourse).forEach((c) => {
+      const spec = c.specialization?.trim();
+      if (spec && !specs.some((s) => s.toLowerCase() === spec.toLowerCase())) specs.push(spec);
+    });
+    return specs.sort((a, b) => a.localeCompare(b));
+  }, [selectedCourse, selectedRegulation, coursesList]);
+
+  // Semesters that actually have subjects for the chosen class + specialization.
+  const semesterOptions = useMemo(() => {
+    const sems = new Set<number>();
+    coursesList.forEach((c) => {
+      if ((c.regulation || '2024') !== selectedRegulation) return;
+      if (selectedCourse && c.course && c.course.trim().toLowerCase() !== selectedCourse) return;
+      if (selectedSpec && c.specialization && c.specialization.trim().toLowerCase() !== selectedSpec) return;
+      sems.add(c.sem);
+    });
+    const list = Array.from(sems).filter((s) => s >= 1 && s <= 8).sort((a, b) => a - b);
+    return list.length > 0 ? list : [1, 2, 3, 4, 5, 6, 7, 8];
+  }, [coursesList, selectedRegulation, selectedCourse, selectedSpec]);
+
+  // If the chosen class/specialization is only seeded under another regulation,
+  // return the newest regulation that has it so the subject list isn't empty.
+  const regulationFor = (course: string, spec?: string): string | null => {
+    const crs = course.trim().toLowerCase();
+    const spc = spec?.trim().toLowerCase();
+    const regs = coursesList
+      .filter((c) => c.course?.trim().toLowerCase() === crs && (!spc || c.specialization?.trim().toLowerCase() === spc))
+      .map((c) => c.regulation || '2024');
+    if (regs.length === 0 || regs.includes(selectedRegulation)) return null;
+    regs.sort();
+    return regs[regs.length - 1];
+  };
+
+  const applyClassSelection = (course: string, spec: string) => {
+    const c = paperData.header.class || '';
+    const firstToken = c.split(' ').filter(Boolean)[0] || '';
+    const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
+    const newClass = [y, course, spec].filter(Boolean).join(' ');
+    const reg = course ? regulationFor(course, spec || undefined) : null;
+    setPaperDataWithAutoSave((prev) => ({
+      ...prev,
+      header: { ...prev.header, class: newClass, ...(reg ? { regulation: reg } : {}) },
+    }));
+  };
 
   const semesterCourses = useMemo(() => {
     if (!selectedSemNum) return [];
@@ -863,6 +907,33 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
       return true;
     });
   }, [selectedSemNum, selectedCourse, selectedSpec, coursesList, selectedRegulation, showElectiveOnly, showMultiOnly]);
+
+  // One entry per course code for the Course Code / Subject dropdowns.
+  const subjectOptions = useMemo(() => {
+    const seen = new Set<string>();
+    return semesterCourses.filter((c) => {
+      if (seen.has(c.code)) return false;
+      seen.add(c.code);
+      return true;
+    });
+  }, [semesterCourses]);
+
+  const selectedSubjectCode = useMemo(() => {
+    const code = (paperData.header.courseCode || '').trim().toUpperCase();
+    return subjectOptions.find((c) => c.code.toUpperCase() === code)?.code || '';
+  }, [paperData.header.courseCode, subjectOptions]);
+
+  const selectSubject = (code: string) => {
+    const found = subjectOptions.find((c) => c.code === code);
+    setPaperDataWithAutoSave((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        courseCode: code,
+        subject: found ? found.title : code ? prev.header.subject : '',
+      },
+    }));
+  };
 
   const [customCourseEntry, setCustomCourseEntry] = useState(false);
   const [courseVal, setCourseVal] = useState('');
@@ -1221,11 +1292,12 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
             </div>
           </div>
           <div className="flex gap-2 items-center">
-            {/* Save status indicator */}
+            {/* Save status indicator - absolutely positioned so it never changes the header's size */}
             {onSave && saveStatus !== 'idle' && (
-              <span className="text-[11px] flex items-center gap-1 px-2 py-1 rounded-md" style={{
+              <span className="absolute right-5 top-full mt-2 z-20 pointer-events-none whitespace-nowrap text-[11px] flex items-center gap-1 px-2 py-1 rounded-md shadow-sm" style={{
                 color: saveStatus === 'saved' ? '#2a7d5f' : saveStatus === 'error' ? '#dc2626' : '#6b7280',
                 background: saveStatus === 'saved' ? '#e8f5ee' : saveStatus === 'error' ? '#fef2f2' : '#f8f9fb',
+                border: '1px solid #e2e5ea',
               }}>
                 {saveStatus === 'saving' && '⏳ Saving...'}
                 {saveStatus === 'saved' && <><CheckCircle size={12} /> Saved</>}
@@ -1436,19 +1508,21 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                   <div className="grid grid-cols-2 gap-2">
                     {!customCourseEntry ? (
                       <select
-                        value={courseVal}
+                        value={courseOptions.find((o) => o.toLowerCase() === courseVal.toLowerCase()) ?? courseVal}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === 'custom') {
                             setCustomCourseEntry(true);
                           } else {
+                            // Keep the specialization only if the new class also offers it
+                            const keepSpec = coursesList.some((c) =>
+                              c.course?.trim().toLowerCase() === val.toLowerCase() &&
+                              c.specialization?.trim().toLowerCase() === specVal.trim().toLowerCase()
+                            );
+                            const nextSpec = keepSpec ? specVal : '';
                             setCourseVal(val);
-                            const c = paperData.header.class || '';
-                            const parts = c.split(' ').filter(Boolean);
-                            const firstToken = parts[0] || '';
-                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
-                            const newClass = [y, val, specVal].filter(Boolean).join(' ');
-                            handleHeaderChange('class', newClass);
+                            setSpecVal(nextSpec);
+                            applyClassSelection(val, nextSpec);
                             if (paperData.header.examName === 'Model Examination') {
                               setPaperDataWithAutoSave(prev => applyModelExamDefaultsForCourse(prev, val));
                             }
@@ -1458,14 +1532,12 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                         style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                       >
                         <option value="">Select Course</option>
-                        <option value="BCA">BCA</option>
-                        <option value="BSc">BSc</option>
-                        <option value="BA">BA</option>
-                        <option value="BBA">BBA</option>
-                        <option value="BCom">BCom</option>
-                        <option value="BE">BE</option>
-                        <option value="MCA">MCA</option>
-                        <option value="MSc">MSc</option>
+                        {courseVal && !courseOptions.some((o) => o.toLowerCase() === courseVal.toLowerCase()) && (
+                          <option value={courseVal}>{courseVal}</option>
+                        )}
+                        {courseOptions.map((crs) => (
+                          <option key={crs} value={crs}>{crs}</option>
+                        ))}
                         <option value="custom">Custom...</option>
                       </select>
                     ) : (
@@ -1504,25 +1576,23 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
 
                     {specsList.length > 0 && !customSpecEntry ? (
                       <select
-                        value={specVal}
+                        value={specsList.find((s) => s.toLowerCase() === specVal.toLowerCase()) ?? specVal}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === 'custom') {
                             setCustomSpecEntry(true);
                           } else {
                             setSpecVal(val);
-                            const c = paperData.header.class || '';
-                            const parts = c.split(' ').filter(Boolean);
-                            const firstToken = parts[0] || '';
-                            const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
-                            const newClass = [y, courseVal, val].filter(Boolean).join(' ');
-                            handleHeaderChange('class', newClass);
+                            applyClassSelection(courseVal, val);
                           }
                         }}
                         className="p-2 text-sm rounded-md"
                         style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                       >
                         <option value="">Select Specialization</option>
+                        {specVal && !specsList.some((s) => s.toLowerCase() === specVal.toLowerCase()) && (
+                          <option value={specVal}>{specVal}</option>
+                        )}
                         {specsList.map(spec => (
                           <option key={spec} value={spec}>{spec}</option>
                         ))}
@@ -1598,49 +1668,46 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                     style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                   >
                     <option value="">Select Semester</option>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                    {(selectedSemNum && !semesterOptions.includes(selectedSemNum)
+                      ? [...semesterOptions, selectedSemNum].sort((a, b) => a - b)
+                      : semesterOptions
+                    ).map((s) => (
                       <option key={s} value={s}>Semester {s}</option>
                     ))}
                   </select>
                 </div>
+                <div className="col-span-2 flex justify-between items-baseline -mb-2">
+                  <span className="text-[10px]" style={{ color: '#6b7280' }}>
+                    {semesterCourses.length > 0
+                      ? `${subjectOptions.length} subject${subjectOptions.length === 1 ? '' : 's'} in the ${selectedRegulation} syllabus`
+                      : 'Pick Class, Specialization and Semester to choose a subject from the syllabus'}
+                  </span>
+                  {semesterCourses.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setManualCourseEntry(!manualCourseEntry)}
+                      className="text-[10px] hover:underline"
+                      style={{ color: '#2a7d5f' }}
+                    >
+                      {manualCourseEntry ? "Select from list" : "Enter manually"}
+                    </button>
+                  )}
+                </div>
                 <div>
-                  <div className="flex justify-between items-baseline mb-1">
-                    <label className="block text-xs font-medium" style={{ color: '#374151' }}>Course Code</label>
-                    {semesterCourses.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setManualCourseEntry(!manualCourseEntry)}
-                        className="text-[10px] hover:underline"
-                        style={{ color: '#2a7d5f' }}
-                      >
-                        {manualCourseEntry ? "Select from list" : "Enter manually"}
-                      </button>
-                    )}
-                  </div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Course Code</label>
                   {semesterCourses.length > 0 && !manualCourseEntry ? (
                     <select
-                      value={paperData.header.courseCode || ''}
+                      value={selectedSubjectCode}
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (val === 'manual') {
-                          setManualCourseEntry(true);
-                        } else {
-                          const foundCourse = semesterCourses.find(c => c.code === val);
-                          setPaperDataWithAutoSave((prev) => ({
-                            ...prev,
-                            header: {
-                              ...prev.header,
-                              courseCode: val,
-                              subject: foundCourse ? foundCourse.title : prev.header.subject
-                            }
-                          }));
-                        }
+                        if (val === 'manual') setManualCourseEntry(true);
+                        else selectSubject(val);
                       }}
                       className="w-full p-2 text-sm rounded-md"
                       style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
                     >
                       <option value="">Select Course Code</option>
-                      {semesterCourses.map((c) => (
+                      {subjectOptions.map((c) => (
                         <option key={c.code} value={c.code}>
                           {c.code} - {c.title}
                         </option>
@@ -1664,7 +1731,26 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Subject</label>
-                  <input type="text" value={paperData.header.subject} onChange={(e) => { let v = e.target.value; if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase()); if (allCaps) v = v.toUpperCase(); handleHeaderChange('subject', v); }} placeholder="e.g. Data Structures" className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5', textTransform: allCaps ? 'uppercase' : 'none' }} />
+                  {semesterCourses.length > 0 && !manualCourseEntry ? (
+                    <select
+                      value={selectedSubjectCode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'manual') setManualCourseEntry(true);
+                        else selectSubject(val);
+                      }}
+                      className="w-full p-2 text-sm rounded-md"
+                      style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5' }}
+                    >
+                      <option value="">Select Subject</option>
+                      {subjectOptions.map((c) => (
+                        <option key={c.code} value={c.code}>{c.title}</option>
+                      ))}
+                      <option value="manual">Enter Manually...</option>
+                    </select>
+                  ) : (
+                    <input type="text" value={paperData.header.subject} onChange={(e) => { let v = e.target.value; if (autoCapitalize) v = v.replace(/\b\w/g, c => c.toUpperCase()); if (allCaps) v = v.toUpperCase(); handleHeaderChange('subject', v); }} placeholder="e.g. Data Structures" className="w-full p-2 text-sm rounded-md" style={{ border: '1.5px solid #7c8088', color: '#1a1a2e', background: '#f1f3f5', textTransform: allCaps ? 'uppercase' : 'none' }} />
+                  )}
                 </div>
 
                 <div>

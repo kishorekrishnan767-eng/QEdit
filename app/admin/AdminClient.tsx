@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { fetchAllSyllabusCourses } from '@/lib/supabase/syllabus';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -293,12 +294,8 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   const fetchSyllabus = async () => {
     setLoadingSyllabus(true);
     try {
-      const { data, error } = await supabase
-        .from('syllabus_courses')
-        .select('*')
-        .order('sem', { ascending: true })
-        .order('code', { ascending: true });
-        
+      const { data, error } = await fetchAllSyllabusCourses<any>();
+
       if (error) {
         console.error('Error fetching syllabus:', error);
       } else if (data) {
