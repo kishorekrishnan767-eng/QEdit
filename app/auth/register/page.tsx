@@ -191,10 +191,6 @@ export default function RegisterPage() {
               <Image src="/logolive.png" alt="Livewires Logo" width={28} height={28} className="object-contain" />
               <p className="text-xl font-bold tracking-wide text-[#86efac]">Livewires</p>
             </div>
-            <div className="ml-11">
-              <p className="text-sm text-white opacity-70">Developed by <span className="opacity-90 font-medium text-white">Vaseem</span></p>
-              <p className="text-sm text-white opacity-70">Developed &amp; Maintained by <span className="opacity-90 font-medium text-white">Kishore Krishnan</span></p>
-            </div>
           </div>
         </div>
       </div>
@@ -353,8 +349,6 @@ export default function RegisterPage() {
 
           <div className="mt-8 lg:hidden flex flex-col items-center gap-0.5 pb-8 border-t border-gray-100 pt-6">
             <p className="text-sm font-bold text-[#2a7d5f]">Livewires</p>
-            <p className="text-xs text-gray-400">Developed by <span className="font-medium text-gray-500">Vaseem</span></p>
-            <p className="text-xs text-gray-400">Developed &amp; Maintained by <span className="font-medium text-gray-500">Kishore Krishnan</span></p>
           </div>
         </div>
       </div>

@@ -52,6 +52,7 @@ const initialPaperData: PaperData = {
       part: "A",
       requiredCount: "ALL",
       defaultMarks: 2,
+      defaultType: "short",
       questions: [],
     },
   ],
@@ -98,6 +99,72 @@ const EXAMS = [
   "Model Examination",
   "End Semester Examination"
 ];
+
+// Undergraduate degree codes offered in the Class dropdown.
+const UG_COURSES = ["BCA", "BSc", "BA", "BBA", "BCom", "BE"];
+
+// Postgraduate degree codes offered in the Class dropdown.
+const PG_COURSES = ["MCA", "MSc"];
+
+// UG Model Examination convention: Part-A (2 marks/question, Short Answer) +
+// Part-B (16 marks/question, Long Answer), 100 total marks, 3 hour duration.
+const applyUGModelExamDefaults = (data: PaperData): PaperData => {
+  const sections = data.sections.map(s => {
+    if (s.part === 'A') return { ...s, defaultMarks: 2, defaultType: 'short' as const };
+    if (s.part === 'B') return { ...s, defaultMarks: 16, defaultType: 'long' as const };
+    return s;
+  });
+  if (!sections.some(s => s.part === 'B')) {
+    sections.push({
+      id: crypto.randomUUID(),
+      title: "Part-B",
+      part: "B",
+      requiredCount: "ALL",
+      defaultMarks: 16,
+      defaultType: 'long',
+      questions: [],
+    });
+  }
+  return {
+    ...data,
+    header: { ...data.header, totalMarks: 100, duration: "3 Hours" },
+    sections,
+  };
+};
+
+// PG (MCA/MSc) Model Examination convention: Part-A (5 marks/question, Short
+// Answer) + Part-B (15 marks/question, Long Answer), 100 total marks, 3 hour duration.
+const applyPGModelExamDefaults = (data: PaperData): PaperData => {
+  const sections = data.sections.map(s => {
+    if (s.part === 'A') return { ...s, defaultMarks: 5, defaultType: 'short' as const };
+    if (s.part === 'B') return { ...s, defaultMarks: 15, defaultType: 'long' as const };
+    return s;
+  });
+  if (!sections.some(s => s.part === 'B')) {
+    sections.push({
+      id: crypto.randomUUID(),
+      title: "Part-B",
+      part: "B",
+      requiredCount: "ALL",
+      defaultMarks: 15,
+      defaultType: 'long',
+      questions: [],
+    });
+  }
+  return {
+    ...data,
+    header: { ...data.header, totalMarks: 100, duration: "3 Hours" },
+    sections,
+  };
+};
+
+// Applies the correct UG/PG default marks + question type for the given
+// course code, when a Model Examination is (or is about to be) selected.
+const applyModelExamDefaultsForCourse = (data: PaperData, course: string): PaperData => {
+  if (UG_COURSES.includes(course)) return applyUGModelExamDefaults(data);
+  if (PG_COURSES.includes(course)) return applyPGModelExamDefaults(data);
+  return data;
+};
 
 interface SyllabusCourse {
   code: string;
@@ -1307,14 +1374,17 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                           }
                         }));
                       } else if (selectedVal === 'Model Examination') {
-                        setPaperDataWithAutoSave(prev => ({
-                          ...prev,
-                          header: {
-                            ...prev.header,
-                            examName: 'Model Examination',
-                            totalMarks: 100
-                          }
-                        }));
+                        setPaperDataWithAutoSave(prev => {
+                          const withExamName = {
+                            ...prev,
+                            header: {
+                              ...prev.header,
+                              examName: 'Model Examination',
+                              totalMarks: 100
+                            }
+                          };
+                          return applyModelExamDefaultsForCourse(withExamName, courseVal);
+                        });
                       } else if (selectedVal === 'Custom') {
                         setPaperDataWithAutoSave(prev => ({
                           ...prev,
@@ -1379,6 +1449,9 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
                             const y = /^(1st|2nd|3rd|4th|[IVXLCDM]+)$/i.test(firstToken) ? firstToken : '';
                             const newClass = [y, val, specVal].filter(Boolean).join(' ');
                             handleHeaderChange('class', newClass);
+                            if (paperData.header.examName === 'Model Examination') {
+                              setPaperDataWithAutoSave(prev => applyModelExamDefaultsForCourse(prev, val));
+                            }
                           }
                         }}
                         className="p-2 text-sm rounded-md"
@@ -1987,6 +2060,7 @@ export default function Editor({ initialData, paperId: initialPaperId, onSave }:
             editingQuestion={editingQuestion}
             onCancelEdit={() => setShowQuestionModal(false)}
             sectionDefaultMarks={paperData.sections.find(s => s.id === activeSectionId)?.defaultMarks}
+            sectionDefaultType={paperData.sections.find(s => s.id === activeSectionId)?.defaultType}
             showBlCoPo={showBlCoPo}
             autoCapitalize={autoCapitalize}
             allCaps={allCaps}

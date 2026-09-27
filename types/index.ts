@@ -30,6 +30,7 @@ export interface Section {
     requiredCount: string;
     questions: Question[];
     defaultMarks?: number; // New: Default marks for questions in this section
+    defaultType?: 'short' | 'long' | 'mcq'; // Default question type for new questions in this section
 }
 
 export interface PaperHeader {

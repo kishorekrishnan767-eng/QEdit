@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   LogOut, Shield, Users, UserCheck, UserX, Plus,
-  RefreshCw, Clock, CheckCircle, XCircle, Trash2, Database, Settings, BookOpen, LayoutDashboard, Search, ChevronRight, Mail, Save, Download, Eye, CheckCircle2, AlertCircle, FileText, Pencil
+  RefreshCw, Clock, CheckCircle, XCircle, Trash2, Database, Settings, BookOpen, LayoutDashboard, Search, ChevronRight, Mail, Save, Download, Eye, CheckCircle2, AlertCircle, FileText, Pencil, Folder, ChevronLeft, Layers
 } from 'lucide-react';
 import Preview from '@/components/Preview';
 import { exportToPDF } from '@/lib/pdfExport';
@@ -44,6 +44,8 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   const [loadingReview, setLoadingReview] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewDept, setReviewDept] = useState<string | null>(null);
+  const [reviewYear, setReviewYear] = useState<string | null>(null);
   const [reviewActionLoading, setReviewActionLoading] = useState<string | null>(null);
   const [previewPaper, setPreviewPaper] = useState<QuestionPaperRecord | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -103,6 +105,11 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
   }, [activeTab]);
 
   const REVIEW_TABS = ['cycle_test_1', 'cycle_test_2', 'model_exam'];
+  const REVIEW_TAB_TITLES: Record<string, string> = {
+    cycle_test_1: 'Cycle Test-I',
+    cycle_test_2: 'Cycle Test-II',
+    model_exam: 'Model Exam',
+  };
 
   const fetchReviewPapers = async (category: string) => {
     setLoadingReview(true);
@@ -124,20 +131,70 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
     if (REVIEW_TABS.includes(activeTab)) {
       fetchReviewPapers(activeTab);
       setReviewSearch('');
+      setReviewDept(null);
+      setReviewYear(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  const UNSPECIFIED = 'Unspecified';
+  const YEAR_ORDER = ['I', 'II', 'III', 'IV', UNSPECIFIED];
+
+  // A paper's header.class is entered as "<Year> <Department> <Specialization>",
+  // e.g. "II BCA DATA SCIENCE" — parse it to drive the department/year folders.
+  const parsePaperClass = (cls?: string) => {
+    const parts = (cls || '').trim().split(/\s+/).filter(Boolean);
+    let year = UNSPECIFIED;
+    let rest = parts;
+    if (parts.length && /^(I|II|III|IV)$/i.test(parts[0])) {
+      year = parts[0].toUpperCase();
+      rest = parts.slice(1);
+    }
+    const department = rest[0] || UNSPECIFIED;
+    return { year, department };
+  };
+
+  const reviewPapersParsed = useMemo(
+    () => reviewPapers.map(p => ({ paper: p, ...parsePaperClass(p.paper_data?.header?.class) })),
+    [reviewPapers]
+  );
+
+  const departmentList = useMemo(() => {
+    const counts = new Map<string, number>();
+    reviewPapersParsed.forEach(({ department }) => counts.set(department, (counts.get(department) || 0) + 1));
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => (a.name === UNSPECIFIED ? 1 : b.name === UNSPECIFIED ? -1 : a.name.localeCompare(b.name)));
+  }, [reviewPapersParsed]);
+
+  const yearList = useMemo(() => {
+    if (!reviewDept) return [];
+    const counts = new Map<string, number>();
+    reviewPapersParsed.forEach(({ department, year }) => {
+      if (department === reviewDept) counts.set(year, (counts.get(year) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => YEAR_ORDER.indexOf(a.name) - YEAR_ORDER.indexOf(b.name));
+  }, [reviewPapersParsed, reviewDept]);
+
+  const scopedReviewPapers = useMemo(() => {
+    if (!reviewDept || !reviewYear) return [];
+    return reviewPapersParsed
+      .filter(({ department, year }) => department === reviewDept && year === reviewYear)
+      .map(({ paper }) => paper);
+  }, [reviewPapersParsed, reviewDept, reviewYear]);
+
   const filteredReviewPapers = useMemo(() => {
-    if (!reviewSearch.trim()) return reviewPapers;
+    if (!reviewSearch.trim()) return scopedReviewPapers;
     const q = reviewSearch.toLowerCase();
-    return reviewPapers.filter(
+    return scopedReviewPapers.filter(
       p =>
         p.title.toLowerCase().includes(q) ||
         p.owner_email.toLowerCase().includes(q) ||
         p.paper_data?.header?.courseCode?.toLowerCase().includes(q)
     );
-  }, [reviewPapers, reviewSearch]);
+  }, [scopedReviewPapers, reviewSearch]);
 
   const handleReviewAction = async (paperId: string, action: 'approve' | 'reject') => {
     if (action === 'reject' && !confirm('Are you sure you want to reject this paper?')) return;
@@ -1143,7 +1200,128 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
           {/* ── SYSOPS REVIEW TABS ── */}
           {(['cycle_test_1', 'cycle_test_2', 'model_exam'] as const).includes(activeTab as any) && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              {/* Search + Refresh */}
+
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-2 text-sm">
+                {(reviewDept) && (
+                  <button
+                    onClick={() => (reviewYear ? setReviewYear(null) : setReviewDept(null))}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-[#2a7d5f] hover:bg-green-50 transition-all"
+                    title="Back"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                )}
+                <button
+                  onClick={() => { setReviewDept(null); setReviewYear(null); }}
+                  className="font-bold transition-colors"
+                  style={{ color: reviewDept ? '#6b7280' : '#111827' }}
+                >
+                  {REVIEW_TAB_TITLES[activeTab]}
+                </button>
+                {reviewDept && (
+                  <>
+                    <ChevronRight size={13} className="text-gray-300" />
+                    <button
+                      onClick={() => setReviewYear(null)}
+                      className="font-bold transition-colors"
+                      style={{ color: reviewYear ? '#6b7280' : '#111827' }}
+                    >
+                      {reviewDept === UNSPECIFIED ? 'Unspecified Department' : reviewDept}
+                    </button>
+                  </>
+                )}
+                {reviewYear && (
+                  <>
+                    <ChevronRight size={13} className="text-gray-300" />
+                    <span className="font-bold text-gray-900">
+                      {reviewYear === UNSPECIFIED ? 'Unspecified Year' : `${reviewYear} Year`}
+                    </span>
+                  </>
+                )}
+                <div className="flex-1" />
+                <button
+                  onClick={() => fetchReviewPapers(activeTab)}
+                  disabled={loadingReview}
+                  className="flex items-center justify-center p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-[#2a7d5f] hover:border-[#2a7d5f] transition-all disabled:opacity-50"
+                  title="Refresh"
+                >
+                  <RefreshCw size={16} className={loadingReview ? 'animate-spin' : ''} />
+                </button>
+              </div>
+
+              {/* Step 1: Department folders */}
+              {!reviewDept && (
+                loadingReview ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400">
+                    <RefreshCw size={24} className="animate-spin mb-3 text-[#2a7d5f]" />
+                    <p className="text-sm font-medium">Loading departments...</p>
+                  </div>
+                ) : reviewError ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-red-400">
+                    <XCircle size={32} className="mb-3" />
+                    <p className="text-sm font-bold">{reviewError}</p>
+                  </div>
+                ) : departmentList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400">
+                    <FileText size={32} className="mb-3 text-gray-300" />
+                    <p className="text-sm font-bold text-gray-500">No papers submitted yet.</p>
+                    <p className="text-xs text-gray-400 mt-1">Papers appear here when users click "Save Final" on matching exam types.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {departmentList.map((d) => (
+                      <button
+                        key={d.name}
+                        onClick={() => setReviewDept(d.name)}
+                        className="flex flex-col items-start gap-3 p-5 rounded-2xl bg-white text-left transition-all duration-200 hover:-translate-y-0.5"
+                        style={{ border: '1px solid #e9ecef', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}
+                      >
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: '#e8f5ee', color: '#2a7d5f' }}>
+                          <Folder size={22} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{d.name === UNSPECIFIED ? 'Unspecified Department' : d.name}</p>
+                          <p className="text-xs text-gray-400 font-medium mt-0.5">{d.count} paper{d.count === 1 ? '' : 's'}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {/* Step 2: Year folders */}
+              {reviewDept && !reviewYear && (
+                yearList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400">
+                    <FileText size={32} className="mb-3 text-gray-300" />
+                    <p className="text-sm font-bold text-gray-500">No papers in this department.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {yearList.map((y) => (
+                      <button
+                        key={y.name}
+                        onClick={() => setReviewYear(y.name)}
+                        className="flex flex-col items-start gap-3 p-5 rounded-2xl bg-white text-left transition-all duration-200 hover:-translate-y-0.5"
+                        style={{ border: '1px solid #e9ecef', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}
+                      >
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: '#e8f5ee', color: '#2a7d5f' }}>
+                          <Layers size={22} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{y.name === UNSPECIFIED ? 'Unspecified Year' : `${y.name} Year`}</p>
+                          <p className="text-xs text-gray-400 font-medium mt-0.5">{y.count} paper{y.count === 1 ? '' : 's'}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {/* Step 3: Papers table */}
+              {reviewDept && reviewYear && (
+              <>
               <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-sm">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -1157,14 +1335,6 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                     onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; }}
                   />
                 </div>
-                <button
-                  onClick={() => fetchReviewPapers(activeTab)}
-                  disabled={loadingReview}
-                  className="flex items-center justify-center p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-[#2a7d5f] hover:border-[#2a7d5f] transition-all disabled:opacity-50"
-                  title="Refresh"
-                >
-                  <RefreshCw size={16} className={loadingReview ? 'animate-spin' : ''} />
-                </button>
               </div>
 
               {/* Papers Table */}
@@ -1296,6 +1466,8 @@ export default function AdminClient({ user, role = 'admin' }: AdminClientProps) 
                   </div>
                 )}
               </div>
+              </>
+              )}
             </div>
           )}
 

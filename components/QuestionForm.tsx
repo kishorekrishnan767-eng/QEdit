@@ -15,12 +15,13 @@ interface QuestionFormProps {
   editingQuestion?: Question | null;
   onCancelEdit?: () => void;
   sectionDefaultMarks?: number;
+  sectionDefaultType?: "short" | "long" | "mcq";
   showBlCoPo?: boolean;
   autoCapitalize?: boolean;
   allCaps?: boolean;
 }
 
-export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelEdit, sectionDefaultMarks, showBlCoPo, autoCapitalize, allCaps }: QuestionFormProps) {
+export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelEdit, sectionDefaultMarks, sectionDefaultType, showBlCoPo, autoCapitalize, allCaps }: QuestionFormProps) {
   const [text, setText] = useState("");
   const [marks, setMarks] = useState(1);
   const [type, setType] = useState<"short" | "long" | "mcq" | "break">("short");
@@ -63,7 +64,10 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       if (sectionDefaultMarks) {
           setMarks(sectionDefaultMarks);
       }
-  }, [sectionDefaultMarks]);
+      if (sectionDefaultType) {
+          setType(sectionDefaultType);
+      }
+  }, [sectionDefaultMarks, sectionDefaultType]);
 
   useEffect(() => {
     if (editingQuestion) {
@@ -110,7 +114,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     } else {
       setText("");
       setMarks(sectionDefaultMarks || 1);
-      setType("short");
+      setType(sectionDefaultType || "short");
       setOptions(["", "", "", ""]);
       setBl("1");
       setCo("1");
@@ -125,7 +129,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
       setDiagramPosition('center');
       setMathEquation(undefined);
     }
-  }, [editingQuestion, sectionDefaultMarks]);
+  }, [editingQuestion, sectionDefaultMarks, sectionDefaultType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,6 +186,7 @@ export default function QuestionForm({ onAddQuestion, editingQuestion, onCancelE
     if (!editingQuestion) {
         setText("");
         setMarks(sectionDefaultMarks || 1);
+        setType(sectionDefaultType || "short");
         setOptions(["", "", "", ""]);
         setBl("1");
         setCo("1");

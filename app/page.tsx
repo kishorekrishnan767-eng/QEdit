@@ -566,8 +566,6 @@ export default function LandingPage() {
              <p className="text-gray-500 text-xs font-medium">© {new Date().getFullYear()} QEdit Platform. All rights reserved.</p>
              <div className="text-center md:text-right text-xs text-gray-500 font-semibold leading-relaxed">
                <p className="text-emerald-400 font-bold text-sm">Livewires</p>
-               <p>Developed by Vaseem</p>
-               <p>Developed &amp; Maintained by Kishore Krishnan</p>
              </div>
            </div>
         </div>

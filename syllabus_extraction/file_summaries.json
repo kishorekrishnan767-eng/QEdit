@@ -1,0 +1,512 @@
+[
+  {
+    "file": "2024 BA ENGLISH FINAL.pdf",
+    "status": "ok",
+    "programme": "BA - English",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BA JMC FINAL.pdf",
+    "status": "ok",
+    "programme": "BA - Journalism and Mass Communication",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCA CA FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BCA DATA SCIENCE FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BCA GEN AI FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BCOM AF FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Accounting and Finance",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM BFSI FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Banking, Financial Services and Insurance",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM CA FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Computer Applications",
+    "regulation": "2024",
+    "rows": 74,
+    "flagged": 37,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM CS FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Corporate Secretaryship",
+    "regulation": "2024",
+    "rows": 67,
+    "flagged": 30,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM FT FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Finance and Taxation",
+    "regulation": "2024",
+    "rows": 71,
+    "flagged": 34,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM GENERAL FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Commerce",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM IAF FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - International Accounting and Finance",
+    "regulation": "2024",
+    "rows": 72,
+    "flagged": 35,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM ISM FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Information System Management",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM PA FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Professional Accounting",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BCOM SF FINAL.pdf",
+    "status": "ok",
+    "programme": "BCOM - Strategic Finance",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC BIOTECHNOLOGY FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Biotechnology",
+    "regulation": "2024",
+    "rows": 60,
+    "flagged": 23,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC CHEMISTRY FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Chemistry",
+    "regulation": "2024",
+    "rows": 68,
+    "flagged": 33,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC CS AI & ML FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BSC CS CYBER SECURITY FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BSC CS FINAL.pdf",
+    "status": "skipped_already_seeded"
+  },
+  {
+    "file": "2024 BSC DEFENCE FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Defence and Strategic Studies",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 41,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC ECONOMICS FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Economics",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC FASHION DESIGN FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Fashion Designing",
+    "regulation": "2024",
+    "rows": 67,
+    "flagged": 30,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC MATHS FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Mathematics",
+    "regulation": "2024",
+    "rows": 65,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC PHYSICAL EDUCATION FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Physical Education",
+    "regulation": "2024",
+    "rows": 76,
+    "flagged": 53,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC PHYSICS FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Physics",
+    "regulation": "2024",
+    "rows": 67,
+    "flagged": 30,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC PSYCHOLOGY FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Psychology",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 36,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC STATISTICS.pdf",
+    "status": "ok",
+    "programme": "BSc - Statistics",
+    "regulation": "2024",
+    "rows": 66,
+    "flagged": 29,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "2024 BSC VISCOM FINAL.pdf",
+    "status": "ok",
+    "programme": "BSc - Visual Communication",
+    "regulation": "2024",
+    "rows": 68,
+    "flagged": 31,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "UG 2024 BSC Biomedical Sciences.pdf",
+    "status": "ok",
+    "programme": "BSc - Biomedical Science",
+    "regulation": "2024",
+    "rows": 62,
+    "flagged": 32,
+    "semesters_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "file": "UG 2024 BSC Film Technology Syllabus.pdf",
+    "status": "ok_multi_track",
+    "programme": "BSc - Film Technology (6 tracks)",
+    "regulation": "2024",
+    "rows": 255,
+    "flagged": 164,
+    "tracks": {
+      "FILM TECHNOLOGY": [
+        1,
+        2
+      ],
+      "DIRECTION": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "CINEMATOGRAPHY": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "EDITING": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "SOUND": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "GRAPHICS AND ANIMATION": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    }
+  }
+]
